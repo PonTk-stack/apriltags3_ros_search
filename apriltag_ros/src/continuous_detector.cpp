@@ -75,10 +75,16 @@ namespace apriltag_ros{
 		// their payload values
 		if(draw_tag_detections_image_){
 			tag_detector_->drawDetections(cv_image_);
+			//ROS_INFO_STREAM( tag_detector_->p1);
+
 			tag_detections_image_publisher_.publish(cv_image_->toImageMsg());
 		}
 		pre_t =ros::Time::now().toSec();
 		//ROS_INFO("%.10f",pre_t -t );
+		if(tag_detector_->detectflag){
+			ROS_INFO_STREAM( tag_detector_->p1);
+			tag_detector_->detectflag = false;
+		}
 	}
 
 } // namespace apriltag_ros

@@ -169,6 +169,7 @@ class TagDetector
   int refine_edges_;
   int debug_;
 
+
   // AprilTag 2 objects
   apriltag_family_t *tf_;
   apriltag_detector_t *td_;
@@ -184,6 +185,10 @@ class TagDetector
   std::string camera_tf_frame_;
 
  public:
+	//trim point p1:hidariue p2:hidarisita p3:migisita p4:migiue
+	bool detectflag = false;
+	cv::Point p1,p2,p3,p4;
+
 
   TagDetector(ros::NodeHandle pnh);
   ~TagDetector();

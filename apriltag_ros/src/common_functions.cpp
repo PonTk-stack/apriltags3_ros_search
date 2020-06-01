@@ -532,11 +532,6 @@ void TagDetector::drawDetections (cv_bridge::CvImagePtr image)
     // tag coords). cv::Scalar(Blue, Green, Red) format for the edge
     // colors!
 
-//cv::Point((int)det->p[3][0], (int)det->p[3][1])/*hidariue*/
-//cv::Point((int)det->p[0][0], (int)det->p[0][1])/*hidarisita*/
-//cv::Point((int)det->p[1][0], (int)det->p[1][1])/*migisita*/
-//cv::Point((int)det->p[2][0], (int)det->p[2][1])/*migiue*/
-
 
     line(image->image, cv::Point((int)det->p[0][0], (int)det->p[0][1])/*hidarisita*/,
          cv::Point((int)det->p[1][0], (int)det->p[1][1])/*migisita*/,
@@ -551,7 +546,15 @@ void TagDetector::drawDetections (cv_bridge::CvImagePtr image)
          cv::Point((int)det->p[3][0], (int)det->p[3][1]),
          cv::Scalar(0xff, 0, 0)); // blue
 
-
+//cv::Point((int)det->p[3][0], (int)det->p[3][1])/*hidariue*/
+//cv::Point((int)det->p[0][0], (int)det->p[0][1])/*hidarisita*/
+//cv::Point((int)det->p[1][0], (int)det->p[1][1])/*migisita*/
+//cv::Point((int)det->p[2][0], (int)det->p[2][1])/*migiue*/
+		this->detectflag = true;
+		this->p1=cv::Point((int)det->p[3][0], (int)det->p[3][1]);
+		this->p2=cv::Point((int)det->p[0][0], (int)det->p[0][1]);
+		this->p3=cv::Point((int)det->p[1][0], (int)det->p[1][1]);
+		this->p4=cv::Point((int)det->p[2][0], (int)det->p[2][1]);
 
 
     // Print tag ID in the middle of the tag
