@@ -12,3 +12,8 @@ float64[] size
 # homography is from at least the four corners of one member tag and at most the
 # four corners of all member tags.
 geometry_msgs/PoseWithCovarianceStamped pose
+
+
+int32[] pxdata #xdata  0:hidariue 1:hidarisita 2:migisita 3:migiue
+int32[] pydata #ydata  0:hidariue 1:hidarisita 2:migisita 3:migiue
+

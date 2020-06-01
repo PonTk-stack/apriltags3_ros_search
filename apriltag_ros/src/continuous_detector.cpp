@@ -82,7 +82,7 @@ namespace apriltag_ros{
 		pre_t =ros::Time::now().toSec();
 		//ROS_INFO("%.10f",pre_t -t );
 		if(tag_detector_->detectflag){
-			ROS_INFO_STREAM( tag_detector_->p1);
+		//	ROS_INFO_STREAM( tag_detector_->p1);
 			tag_detector_->detectflag = false;
 		}
 	}
