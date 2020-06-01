@@ -1,0 +1,7 @@
+apriltags3_param:
+  - name: aaa
+    id: 0
+  - name: bbb
+    id: 1
+  - name: ccc
+    id: 2
