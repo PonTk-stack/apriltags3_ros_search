@@ -298,17 +298,31 @@ AprilTagDetectionArray TagDetector::detectTags (
     Eigen::Matrix4d transform = getRelativeTransform(standaloneTagObjectPoints,
                                                      standaloneTagImagePoints,
                                                      fx, fy, cx, cy);
+
+
     Eigen::Matrix3d rot = transform.block(0, 0, 3, 3);
     Eigen::Quaternion<double> rot_quaternion(rot);
     
     geometry_msgs::PoseWithCovarianceStamped tag_pose =
         makeTagPose(transform, rot_quaternion, image->header);
 
+			ROS_INFO_STREAM("a"<<detection->p[3][0]);//;cv::Point((int)detection->p[3][0], (int)detection->p[3][1]));
+		int pxdata[] = {(int)detection->p[3][0] , (int)detection->p[0][0] ,  (int)detection->p[1][0] , (int)detection->p[2][0]};
+		int pydata[] = {(int)detection->p[3][1] , (int)detection->p[0][1] ,  (int)detection->p[1][1] , (int)detection->p[2][1] };
     // Add the detection to the back of the tag detection array
     AprilTagDetection tag_detection;
     tag_detection.pose = tag_pose;
     tag_detection.id.push_back(detection->id);
     tag_detection.size.push_back(tag_size);
+
+		for(i=0;i<4;i++){
+			tag_detection.pxdata.push_back(pxdata[i]);
+			tag_detection.pydata.push_back(pydata[i]);
+		}
+
+		
+
+
     tag_detection_array.detections.push_back(tag_detection);
     detection_names.push_back(standaloneDescription->frame_name());
   }
@@ -550,11 +564,13 @@ void TagDetector::drawDetections (cv_bridge::CvImagePtr image)
 //cv::Point((int)det->p[0][0], (int)det->p[0][1])/*hidarisita*/
 //cv::Point((int)det->p[1][0], (int)det->p[1][1])/*migisita*/
 //cv::Point((int)det->p[2][0], (int)det->p[2][1])/*migiue*/
-		this->detectflag = true;
+/*
 		this->p1=cv::Point((int)det->p[3][0], (int)det->p[3][1]);
 		this->p2=cv::Point((int)det->p[0][0], (int)det->p[0][1]);
 		this->p3=cv::Point((int)det->p[1][0], (int)det->p[1][1]);
 		this->p4=cv::Point((int)det->p[2][0], (int)det->p[2][1]);
+*/
+		this->detectflag = true;
 
 
     // Print tag ID in the middle of the tag
