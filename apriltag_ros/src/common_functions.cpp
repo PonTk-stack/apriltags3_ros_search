@@ -306,7 +306,7 @@ AprilTagDetectionArray TagDetector::detectTags (
     geometry_msgs::PoseWithCovarianceStamped tag_pose =
         makeTagPose(transform, rot_quaternion, image->header);
 
-			ROS_INFO_STREAM("a"<<detection->p[3][0]);//;cv::Point((int)detection->p[3][0], (int)detection->p[3][1]));
+			//ROS_INFO_STREAM("a"<<detection->p[3][0]);//;cv::Point((int)detection->p[3][0], (int)detection->p[3][1]));
 		int pxdata[] = {(int)detection->p[3][0] , (int)detection->p[0][0] ,  (int)detection->p[1][0] , (int)detection->p[2][0]};
 		int pydata[] = {(int)detection->p[3][1] , (int)detection->p[0][1] ,  (int)detection->p[1][1] , (int)detection->p[2][1] };
     // Add the detection to the back of the tag detection array

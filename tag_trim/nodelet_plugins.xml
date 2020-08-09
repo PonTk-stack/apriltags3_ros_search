@@ -1,0 +1,9 @@
+<library path= "lib/libtag_trim_plugin_nodelet_image_trim_node">
+	<class  name = "tag_trim/ImageConverter"
+					type = "nodelet_image_trim::ImageConverter"
+					base_class_type = "nodelet::Nodelet">
+		<description>
+		Nodelet tagtrim
+		</description>
+	</class>
+</library>
