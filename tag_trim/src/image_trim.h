@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "apriltag_detector.h"
+#include "tracking.h"
+
 typedef Eigen::Vector2d Vector2;
 typedef Eigen::Vector3d Vector3;
 typedef Eigen::Matrix3d Matrix3;
@@ -185,6 +188,8 @@ class ImageConverter  : ROSCommonNode   {
 
 		Tracking track;
 
+		Tracking2 track2;
+		ApriltagDetector apriltag_detector;
 		
 	public: 
 		ImageConverter(int argc, char** argv,const char* node_name);

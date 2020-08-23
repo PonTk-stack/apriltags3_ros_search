@@ -11,7 +11,9 @@ extern Eigen::Matrix<double,3,4> Tracking::f;//焦点距離
 extern Eigen::Matrix<double,5,1> Tracking::dist;//歪みパラメータ k1, k2, p1,   p2, k3
 
 
+
 void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
+
 	id = detect.id[0];
 	dt = t - pre_t;
 
@@ -29,6 +31,12 @@ void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
 	float size = detect.size[0];
 	//this->TagPose2uv(c_m3, q0 , size);
 
+	
+
+	std::cout << "tag aaaaaaaaaaaaaaaaaa " <<std::endl; 
+	tag_detector.setApriltag(id,c_m3,q0);
+	std::cout << "fffffffffffffffffffff" <<std::endl; 
+//	std::cout << "tag  "<< tag_detector.apriltags.size() <<std::endl; 
 
 	/*Vector function*/
 	if(!(this->preC_x==0&&this->preC_x==0&&this->preC_x==0)){
@@ -138,10 +146,6 @@ void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
 
 	/*
 		 system ("clear");
-		 std::cout << "******size********" <<std::endl; 
-		 std::cout << this->uv_sizev<<std::endl; 
-		 std::cout << std::endl<<  q.toRotationMatrix() <<std::endl; 
-		 std::cout << "******uv_m********" <<std::endl; 
 		 std::cout << this->uv_m <<std::endl; 
 		 */
 }
@@ -196,12 +200,9 @@ void Tracking::TagPose2uv(Eigen::Vector3d c_m3, Eigen::Quaterniond qu, float tag
 	float anzenKy = 1.2;
 	uv_vx = this->uv_x - this->preUv_x;
 	uv_vy = this->uv_y - this->preUv_y;
-	anzenKx += 0.5*abs(uv_vx)    ;
-	anzenKy += 0.5*abs(uv_vy)    ;
+	anzenKx += 0.01*abs(uv_vx)    ;
+	anzenKy += 0.01*abs(uv_vy)    ;
 
-	std::cout << "bbbbbbbbbb" <<std::endl; 
-	std::cout << anzenKx <<std::endl; 
-	std::cout << abs(uv_vx) <<std::endl; 
 
 	this->size_w  = anzenKx * (std::max({p1(0), p2(0), p3(0), p4(0)}) - std::min( {p1(0), p2(0), p3(0), p4(0)}));
 	this->size_h  = anzenKy * (std::max({p1(1), p2(1), p3(1), p4(1)}) - std::min( {p1(1), p2(1), p3(1), p4(1)}));
@@ -444,6 +445,7 @@ void ImageConverter::RectanglePoint(const apriltag_ros::AprilTagDetection &detec
 
 
 void ImageConverter::TagDetectCallback(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg){
+	
 
 	XmlRpc::XmlRpcValue params;
 	nh.getParam("/apriltags3_param", params);
@@ -453,7 +455,7 @@ void ImageConverter::TagDetectCallback(const apriltag_ros::AprilTagDetectionArra
 		detect_flag = true;
 		Tracking::t = ros::Time::now().toSec();
 		int i,t;
-
+ 
 		for(i=0;i<msg->detections.size();i++){
 			//std::vector<apriltag_ros::AprilTagDetectionArray> it;
 

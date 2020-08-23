@@ -21,7 +21,6 @@
 
 #include <nodelet/nodelet.h>
 
-#include "apriltag_agent.h"
 
 #include "std_msgs/String.h"
 #include "apriltag_ros/AprilTagDetectionArray.h"
@@ -29,6 +28,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "apriltag_detector.h"
+#include "tracking.h"
+#include "image_grabber.h"
 
 
 
@@ -96,7 +98,6 @@ class Tracking{
 
 	public:
 
-		ApriltagAgent apriltag_agent;
 
 
 		/*this*/
@@ -198,7 +199,11 @@ class ImageConverter :  public nodelet::Nodelet   {
 
 		Tracking track;
 
+		Tracking2 track2;
 
+		ApriltagDetector apriltag_detector;
+
+		ImageGrabber ig;
 	public: 
 		virtual void onInit();
 		ImageConverter();

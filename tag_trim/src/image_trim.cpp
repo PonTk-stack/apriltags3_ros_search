@@ -259,6 +259,7 @@ ImageConverter::ImageConverter(int argc,char** argv,const char* node_name): ROSC
 
 
 void ImageConverter::InfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info){
+	track2.setICP(info);
 	camera_info = *info;
 
 	const double kx = camera_info.K[0];
@@ -442,12 +443,26 @@ void ImageConverter::TagDetectCallback(const apriltag_ros::AprilTagDetectionArra
 
 		for(i=0;i<msg->detections.size();i++){
 			//std::vector<apriltag_ros::AprilTagDetectionArray> it;
+			
+			apriltag_detector.setApriltag(msg->detections[i]);
+			std::cout << apriltag_detector.savedApriltagsLength()<< std::endl;
+			std::cout << "***********1************" << std::endl;
+			std::cout << apriltag_detector.apriltags[0].getX()<< std::endl;
+			std::vector<cv::Point> ltrb = track2.getWindowParam(apriltag_detector,msg->detections[i].id[0]);
+			std::cout << "***********2************" << std::endl;
+			lefttop = ltrb[0];
+			rightbottom = ltrb[1];
+
+			std::cout <<lefttop.x <<","<< lefttop.y<< std::endl;
+			std::cout <<rightbottom.x <<","<< rightbottom.y<< std::endl;
+			std::cout << "***********3************" << std::endl;
 
 			track.measurePose(msg->detections[i]);
 			p1 = track.p1; 
 			p2 = track.p2; 
 			p3 = track.p3; 
 			p4 = track.p4; 
+			std::cout << "***********4************" << std::endl;
 
 
 			pv_cx = track.uv_x;
@@ -476,10 +491,6 @@ void ImageConverter::TagDetectCallback(const apriltag_ros::AprilTagDetectionArra
 
 
 
-			lefttop.x = pv_cx - 0.5*pv_w;
-			lefttop.y = pv_cy - 0.5*pv_h;
-			rightbottom.x = pv_cx + 0.5*pv_w;
-			rightbottom.y = pv_cy + 0.5*pv_h;
 			if(lefttop.x<0)lefttop.x = 0;
 			//else if(lefttop.x>img_size[0])lefttop.x = img_size[0];
 			if(lefttop.y<0)lefttop.y = 0;

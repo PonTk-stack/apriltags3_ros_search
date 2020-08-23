@@ -11,7 +11,7 @@ extern Eigen::Matrix<double,3,4> Tracking::f;//焦点距離
 extern Eigen::Matrix<double,5,1> Tracking::dist;//歪みパラメータ k1, k2, p1,   p2, k3
 
 
-
+/*
 void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
 
 	id = detect.id[0];
@@ -29,12 +29,6 @@ void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
 	Eigen::Vector3d c_m3( c_x, c_y, c_z);
 	Eigen::Quaterniond q0(qw,qx,qy,qz);
 	float size = detect.size[0];
-	//this->TagPose2uv(c_m3, q0 , size);
-
-	apriltag_agent.setApriltag(id,c_x,c_y,c_z,q0);
-	std::cout << "tag  "<< apriltag_agent.apriltag.size() <<std::endl; 
-
-	/*Vector function*/
 	if(!(this->preC_x==0&&this->preC_x==0&&this->preC_x==0)){
 		c_vx = (c_x - this->preC_x);//  /dt ;
 		c_vy = (c_y - this->preC_y);//  /dt ;
@@ -46,35 +40,12 @@ void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
 
 		Eigen::Quaterniond dq(dqw,dqv(0),dqv(1),dqv(2)  );
 
-		Eigen::Vector3d nextC_m3( c_x+c_vx, c_y+c_vy, c_z+c_vz/**dt*/);
+		Eigen::Vector3d nextC_m3( c_x+c_vx, c_y+c_vy, c_z+c_vz);
 		Eigen::Quaterniond nextQ(qw+dqw, qx+dqv(0), qy+dqv(1), qz+dqv(2));
 
 		this->TagPose2uv(nextC_m3, nextQ , size);
 	}
 
-	/*
-		 double Q_sitaw2 =  acos(qw);
-		 double sinw2 = sin(Q_sitaw2); 
-		 double lamda_x = qx / sinw2;
-		 double lamda_y = qy / sinw2;
-		 double lamda_z = qz / sinw2;
-		 this->Q_sita = Q_sitaw2 *2 ;
-		 Eigen::Matrix<double,4,4> W_lamda;
-		 Eigen::Matrix<double,4,4> W_c;
-
-		 W_lamda <<          0,   lamda_z, -1*lamda_y, lamda_x,
-		 -1*lamda_z,         0,    lamda_x, lamda_y,
-		 lamda_y,-1*lamda_x,          0, lamda_z, 
-		 -1*lamda_y,-1*lamda_x, -1*lamda_z;       0,
-
-		 W_c = this->Q_sita * W_lamda;
-
-		 Eigen::Quaterniond q_dasho;
-		 Eigen::Vector4d qo(qx,qy,qz,qw);
-
-		 q_dasho = 0.5 * W_c * qo; 
-		 Eigen::Vector4d q_dash(qx,qy,qz,qw);
-		 */
 
 	Eigen::Vector4d q(qx,qy,qz,qw);
 	this->pre_q =q;
@@ -87,66 +58,14 @@ void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
 	this->preC_x = c_x; 
 	this->preC_y = c_y; 
 	this->preC_z = c_z; 
-
-
-	//Eigen::Vector3d rpy_rad = q.toRotationMatrix().eulerAngles(0, 1, 2);
-	//	c_m << c_x/c_z,
-	//				 c_y/c_z,
-	//				 1;
-
-	/*
-
-		 this->uv_m = A*c_m; // A = uv_R_c
-		 this->uv_m /=this->uv_m(2,0);  //tag centor point
-
-		 this->uv_x = uv_m(0,0);
-		 this->uv_y = uv_m(1,0);
-		 */
-
-
-	/*
-		 Eigen::Matrix<double,3,4> sizev3x4;
-	//sizev3x4<<size/-2, size/-2, size/2, size/2,
-	//					size/2, size/-2, size/-2, size/2,
-	//							0.0,    0.0,    0.0,    0.0;
-
-	sizev3x4<<size/-2, size/-2, size/2, size/2,
-	size/-2, size/2, size/2, size/-2,
-	0.0,    0.0,    0.0,    0.0;
-
-	c_m3x4 << c_x,c_x,c_x,c_x,
-	c_y,c_y,c_y,c_y,
-	c_z,c_z,c_z,c_z;
-
-	uv_sizev3x4 =A3x3 *( c_m3x4 +  (q.toRotationMatrix() * sizev3x4) ) ;
-	//uv_sizev /= uv_sizev(2,0);
-	//this->size_w = uv_sizev(0,0);
-	//this->size_h =  uv_sizev(1,0); 
-
-	this->p1 << uv_sizev3x4(0,0)/uv_sizev3x4(2,0),
-	uv_sizev3x4(1,0)/uv_sizev3x4(2,0);
-
-	this->p2 << uv_sizev3x4(0,1)/uv_sizev3x4(2,1),
-	uv_sizev3x4(1,1)/uv_sizev3x4(2,1);
-
-	this->p3 << uv_sizev3x4(0,2)/uv_sizev3x4(2,2),
-	uv_sizev3x4(1,2)/uv_sizev3x4(2,2);
-
-	this->p4 << uv_sizev3x4(0,3)/uv_sizev3x4(2,3),
-	uv_sizev3x4(1,3)/uv_sizev3x4(2,3);
-
-	this->size_w  = std::max({p1(0), p2(0), p3(0), p4(0)}) - std::min( {p1(0), p2(0), p3(0), p4(0)});
-	this->size_h  = std::max({p1(1), p2(1), p3(1), p4(1)}) - std::min( {p1(1), p2(1), p3(1), p4(1)});
-	*/
-
-
-	/*
-		 system ("clear");
-		 std::cout << this->uv_m <<std::endl; 
-		 */
 }
+*/
+
+
+
 //void Tracking::TagPose2uv(Eigen::Vector3d c_v, Eigen::Quaterniond q, float tagsize){
 
+/*
 void Tracking::TagPose2uv(Eigen::Vector3d c_m3, Eigen::Quaterniond qu, float tagsize){
 
 	double c_x_ = c_m3(0);
@@ -162,11 +81,6 @@ void Tracking::TagPose2uv(Eigen::Vector3d c_m3, Eigen::Quaterniond qu, float tag
 	this->uv_y = uv_m(1,0);
 
 	Eigen::Matrix<double,3,4> sizev3x4;
-	/*
-		 sizev3x4<<tagsize/-2, tagsize/-2,  tagsize/2, tagsize/2,
-		 tagsize/2, tagsize/-2, tagsize/-2, tagsize/2,
-		 0.0,     0.0,     0.0,    0.0;
-		 */
 	sizev3x4<<tagsize/-2, tagsize/-2, tagsize/2, tagsize/2,
 		tagsize/-2, tagsize/2, tagsize/2, tagsize/-2,
 		0.0,    0.0,    0.0,    0.0;
@@ -199,8 +113,6 @@ void Tracking::TagPose2uv(Eigen::Vector3d c_m3, Eigen::Quaterniond qu, float tag
 	anzenKx += 0.01*abs(uv_vx)    ;
 	anzenKy += 0.01*abs(uv_vy)    ;
 
-	std::cout << anzenKx <<std::endl; 
-	std::cout << abs(uv_vx) <<std::endl; 
 
 	this->size_w  = anzenKx * (std::max({p1(0), p2(0), p3(0), p4(0)}) - std::min( {p1(0), p2(0), p3(0), p4(0)}));
 	this->size_h  = anzenKy * (std::max({p1(1), p2(1), p3(1), p4(1)}) - std::min( {p1(1), p2(1), p3(1), p4(1)}));
@@ -210,6 +122,7 @@ void Tracking::TagPose2uv(Eigen::Vector3d c_m3, Eigen::Quaterniond qu, float tag
 	this->preUv_y = this->uv_y;
 
 }
+*/
 
 
 
@@ -263,6 +176,9 @@ void ImageConverter::onInit(){
 
 
 void ImageConverter::InfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info){
+	track2.setICP(info);
+
+
 	camera_info = *info;
 
 	const double kx = camera_info.K[0];
@@ -456,64 +372,26 @@ void ImageConverter::TagDetectCallback(const apriltag_ros::AprilTagDetectionArra
  
 		for(i=0;i<msg->detections.size();i++){
 			//std::vector<apriltag_ros::AprilTagDetectionArray> it;
+			apriltag_detector.setApriltag(msg->detections[i]);
+			std::vector<cv::Point> ltrb = track2.getWindowParam(apriltag_detector,msg->detections[i].id[0]);
+			lefttop = ltrb[0];
+			rightbottom = ltrb[1];
 
-			track.measurePose(msg->detections[i]);
-			p1 = track.p1; 
-			p2 = track.p2; 
-			p3 = track.p3; 
-			p4 = track.p4; 
+			ig.getA();
 
+			//track2.getWindowParam(msg->detections[i]);
 
-			pv_cx = track.uv_x;
-			pv_cy = track.uv_y;
-
-			pv_w = track.size_w;
-			pv_h = track.size_h;
-			//RectanglePoint(msg->detections[i]);
-
-
-
-
-			/*
-				 lefttop.x = pv_cx - 0.5*pv_w;
-				 lefttop.y = pv_cy - 0.5*pv_h;
-				 rightbottom.x = pv_cx + 0.5*pv_w;
-				 rightbottom.y = pv_cy + 0.5*pv_h;
-				 */
+			//track.measurePose(msg->detections[i]);
+			//p1 = track2.getP1(); 
+			//p2 = track2.getP2(); 
+			//p3 = track2.getP3(); 
+			//p4 = track2.getP4(); 
 			drawpoint_flag = true;
 			if(p1(0)<0 || p2(0)<0 || p3(0)<0 || p4(0)<0){drawpoint_flag = false;}
 			else if(p1(0)<img_size[0] || p2(0)<img_size[0] || p3(0)<img_size[0] || p4(0)<img_size[0] ){drawpoint_flag = false;}
 
 			if(p1(1)<0 || p2(1)<0 || p3(1)<0 || p4(1)<0){drawpoint_flag = false;}
 			else if(p1(1)<img_size[1] || p2(1)<img_size[1] || p3(1)<img_size[1] || p4(1)<img_size[1] ){drawpoint_flag = false;}
-
-
-
-
-			lefttop.x = pv_cx - 0.5*pv_w;
-			lefttop.y = pv_cy - 0.5*pv_h;
-			rightbottom.x = pv_cx + 0.5*pv_w;
-			rightbottom.y = pv_cy + 0.5*pv_h;
-			if(lefttop.x<0)lefttop.x = 0;
-			//else if(lefttop.x>img_size[0])lefttop.x = img_size[0];
-			if(lefttop.y<0)lefttop.y = 0;
-			//else if(lefttop.y>img_size[1])lefttop.y = img_size[1];
-			//if(rightbottom.x<0)rightbottom.x = 0;
-			if(rightbottom.x>img_size[0])rightbottom.x = img_size[0];
-			//if(rightbottom.y<0)rightbottom.y = 0;
-			if(rightbottom.y>img_size[1])rightbottom.y = img_size[1];
-
-			//ROS_INFO("w:%d h:%d cx:%d cy:%d",pv_w,pv_h,pv_cx,pv_cy);
-			if(lefttop.x > rightbottom.x){
-				lefttop.x = 0;
-				rightbottom.x=img_size[0];
-			}
-			if(lefttop.y > rightbottom.y){
-				lefttop.y = 0;
-				rightbottom.y=img_size[1];
-			}
-			//std::cout << rightbottom <<"  "<< lefttop <<std::endl; 
-
 		}
 		Tracking::pre_t = Tracking::t;
 	}

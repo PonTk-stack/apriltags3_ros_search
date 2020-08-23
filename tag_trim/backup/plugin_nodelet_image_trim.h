@@ -21,12 +21,16 @@
 
 #include <nodelet/nodelet.h>
 
+#include "apriltag_detector.h"
 
 #include "std_msgs/String.h"
 #include "apriltag_ros/AprilTagDetectionArray.h"
 #include "apriltag_ros/AprilTagDetection.h"
 #include <stdlib.h>
 #include <math.h>
+
+
+
 
 typedef Eigen::Vector2d Vector2;
 typedef Eigen::Vector3d Vector3;
@@ -91,6 +95,9 @@ class Tracking{
 		double uv_vy;
 
 	public:
+
+		ApriltagDetector tag_detector;
+
 
 		/*this*/
 		int id;

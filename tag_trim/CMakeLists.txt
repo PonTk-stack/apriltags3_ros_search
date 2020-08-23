@@ -229,27 +229,46 @@ include_directories(
 #include_directories(EIGEN3_INCLUDE_DIR)
 
 find_package(OpenCV REQUIRED)
-#set(tag_trim_src
-#	src/image_trim.cpp
-#	src/image_trim.h
-#)
-#add_executable(${PROJECT_NAME}_image_trim_node
-#	src/image_trim_main.cpp 
-#	${tag_trim_src}
-#)
-#add_dependencies(${PROJECT_NAME}_image_trim_node  ${PROJECT_NAME}_generate_messages_cpp)
-#
-#target_link_libraries(${PROJECT_NAME}_image_trim_node 
-#	${catkin_LIBRARIES}
-#	${OpenCV_LIBRARIES}
-#)#${Eigen3_LIBRARIES})
+set(tag_trim_src
+	src/image_trim.cpp
+	src/image_trim.h
+	src/apriltag_detector.h
+	src/apriltag_detector.cpp
+	src/apriltag.h
+	src/apriltag.cpp
+	src/tracking.h
+	src/tracking.cpp
+	src/uv_apriltag.h
+	src/uv_apriltag.cpp
+	src/camera.h
+	src/camera.cpp
+	src/image_grabber.h
+	src/image_grabber.cpp
+)
+add_executable(${PROJECT_NAME}_image_trim_node
+	src/image_trim_main.cpp 
+	${tag_trim_src}
+)
+add_dependencies(${PROJECT_NAME}_image_trim_node  ${PROJECT_NAME}_generate_messages_cpp)
+
+target_link_libraries(${PROJECT_NAME}_image_trim_node 
+	${catkin_LIBRARIES}
+	${OpenCV_LIBRARIES}
+)#${Eigen3_LIBRARIES})
 
 set(nodelet_tag_trim_src
 	src/plugin_nodelet_image_trim.cpp
 	src/plugin_nodelet_image_trim.h
+	src/apriltag_detector.h
+	src/apriltag_detector.cpp
 	src/apriltag.h
-	src/apriltag_agent.h
-	src/apriltag_agent.cpp
+	src/apriltag.cpp
+	src/tracking.h
+	src/tracking.cpp
+	src/uv_apriltag.h
+	src/uv_apriltag.cpp
+	src/camera.h
+	src/camera.cpp
 )
 #add_library(${PROJECT_NAME}_plugin_nodelet_image_trim
 #	src/plugin_nodelet_image_trim_main.cpp 
