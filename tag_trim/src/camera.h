@@ -23,7 +23,7 @@ class Camera{
 		Eigen::Matrix<double,3,4> f;//焦点距離
 		Eigen::Matrix<double,5,1> dist;//歪みパラメータk1,k2,p1,p2, k3
 
-		const int img_size[2] = {1280,720};
+		const static int img_size[2];
 };
 
 #endif//CAMERA_H

@@ -1,6 +1,7 @@
 #include"camera.h"
 Eigen::Matrix<double,3,4> Camera::A;
 Eigen::Matrix<double,3,3> Camera::K;
+const int Camera::img_size[2] = {1280,720};
 void Camera::setICP(const sensor_msgs::CameraInfo::ConstPtr &info){
 	camera_info = *info;
 	const double kx = camera_info.K[0];

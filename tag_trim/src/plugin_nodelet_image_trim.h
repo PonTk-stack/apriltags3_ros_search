@@ -12,7 +12,6 @@
 
 #include <eigen3/Eigen/Dense>
 
-
 #include "message_filters/subscriber.h"
 #include "message_filters/synchronizer.h"
 #include "message_filters/time_synchronizer.h"
@@ -20,7 +19,6 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <nodelet/nodelet.h>
-
 
 #include "std_msgs/String.h"
 #include "apriltag_ros/AprilTagDetectionArray.h"
@@ -31,7 +29,6 @@
 #include "apriltag_detector.h"
 #include "tracking.h"
 #include "image_grabber.h"
-
 
 
 typedef Eigen::Vector2d Vector2;
@@ -65,93 +62,6 @@ class ROSCommonNode
 			ros::init(argc, argv, node_name);
 		}
 };
-
-class Tracking{
-	private:
-
-
-		double preC_x=0,preC_y,preC_z=0;
-		Eigen::Vector4d pre_q;
-		double preC_vx,preC_vy,preC_vz;
-		float Q_sita;
-		float preQ_sita;
-
-		int preUv_x=0,preUv_y=0;
-		/* not this*/
-		double c_x,c_y,c_z;
-		double c_vx,c_vy,c_vz;
-		double c_ax,c_ay,c_az;
-
-
-		double pre_qw;
-
-
-
-
-		float dt;
-
-		//Eigen::Vector3d uv_m,c_m;
-		Eigen::Matrix<double,3,1> uv_m;
-
-		double uv_vx;
-		double uv_vy;
-
-	public:
-
-
-
-		/*this*/
-		int id;
-		int uv_x,uv_y;
-		int size_w, size_h;
-		Eigen::Matrix<int,2,1> p1,p2,p3,p4;
-		/******************/
-
-		static float t , pre_t;
-
-		//Eigen::Matrix3d A;  //カメラ内部パラメータ
-		static Eigen::Matrix<double,3,4> A;//カメラ内部パラメータ
-		static Eigen::Matrix<double,3,3> A3x3;//カメラ内部パラメータ
-		static Eigen::Matrix<double,3,3> K;//画素の有効サイズ(kx ky)
-		static Eigen::Matrix<double,3,4> f;//焦点距離
-		static Eigen::Matrix<double,5,1> dist;//歪みパラメータ k1, k2, p1, p2, k3
-
-		void measurePose(const apriltag_ros::AprilTagDetection &detect );
-		inline Eigen::Vector3d q2rpy_deg(Eigen::Quaterniond q);
-		void TagPose2uv(Eigen::Vector3d c_v,  Eigen::Quaterniond q , float tagsize);
-		void TagVpose2uv(Eigen::Vector3d c_vv,  Eigen::Quaterniond q , float tagsize);
-};
-
-
-
-
-
-
-
-
-inline Eigen::Vector3d Tracking::q2rpy_deg(Eigen::Quaterniond q){
-	double qx = q.x();
-	double qy = q.y();
-	double qz = q.z();
-	double qw = q.w();
-	double sinr_cosp = 2.0 * (qw * qx + qy * qz);
-	double cosr_cosp = 1.0 - 2.0 * (qx * qx + qy * qy);
-	double roll = atan2(sinr_cosp,cosr_cosp);
-	double sinp = 2.0 * (qw * qy - qz * qx);
-	double pitch;
-	if (abs(sinp) >= 1){pitch = PI / 2;}
-	else{pitch = asin(sinp);}
-	double siny_cosp = 2.0 * (qw * qz + qx * qy);
-	double cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
-	double yaw = atan2(siny_cosp, cosy_cosp);
-	if(cosy_cosp<0){
-		if(siny_cosp >= 0) yaw+=180*PI/180;
-		if(siny_cosp <  0) yaw-=180*PI/180;
-	}
-	std::cout <<yaw*180/PI<<" "<<  roll*180/PI<< " "<<pitch*180/PI<<std::endl;
-	Eigen::Vector3d v(yaw*180/PI,roll*180/PI,pitch*180/PI );
-	return v;
-}
 
 
 
@@ -193,11 +103,10 @@ class ImageConverter :  public nodelet::Nodelet   {
 		int pv_cx,pv_cy,pv_w,pv_h;
 
 		bool detect_flag = false;
+		unsigned int  detect_count = 0;
 
 		Eigen::Matrix<int,2,1> p1,p2,p3,p4;
-		bool drawpoint_flag =false;
-
-		Tracking track;
+		bool drawpoint_flag =true;
 
 		Tracking2 track2;
 
@@ -207,12 +116,11 @@ class ImageConverter :  public nodelet::Nodelet   {
 	public: 
 		virtual void onInit();
 		ImageConverter();
-		void imgconvCallback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfo::ConstPtr &info);
-		void TagDetectCallback(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg);
-		void InfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info);
-		void RectanglePoint(const apriltag_ros::AprilTagDetection &detect);
-		void paste(cv::Mat dst, cv::Mat src, int x, int y);
-		void stampText(cv::Mat dst,Tracking track);
+		inline void imgconvCallback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfo::ConstPtr &info);
+		inline void TagDetectCallback(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg);
+		inline void InfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info);
+		inline void paste(cv::Mat dst, cv::Mat src, int x, int y);
+		inline void stampText(cv::Mat dst,Tracking2 track);
 		cv::Mat tool(cv::Mat image_ori);
 		
 };

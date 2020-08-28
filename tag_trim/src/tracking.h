@@ -10,24 +10,19 @@
 
 class Tracking2:UvApriltag{
 	public:
-		Tracking2(){
-			ltrb = {lefttop , rightbottom};
-			};
+		Tracking2(){};
 		~Tracking2(){};
 		//inline Eigen::Vector3d q2rpy_deg(Eigen::Quaterniond q);
 		void setWindowParam(ApriltagDetector apriltag_detector);
 		void setICP(const sensor_msgs::CameraInfo::ConstPtr &info){UvApriltag::setICP(info);};
 		std::vector<cv::Point> getWindowParam(ApriltagDetector apriltag_detector,unsigned int id);
-
-	//	UvApriltag uv_tag;
-		//cv::Point getP1(){return p1;};
-		//cv::Point getP2(){return p2;};
-		//cv::Point getP3(){return p3;};
-		//cv::Point getP4(){return p4;};
+		cv::Point getP1();
+		cv::Point getP2();
+		cv::Point getP3();
+		cv::Point getP4();
 
 	private:
 		std::vector<std::vector<cv::Point>> ltrbs; //[[p,p],[p,p]]
-		std::vector<cv::Point> ltrb; //[p,p]
-		cv::Point lefttop,rightbottom;
+		std::vector<std::vector<unsigned int>> p;
 };
 #endif //TRACKING_G

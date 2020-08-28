@@ -37,6 +37,15 @@ double Apriltag::getY(){
 double Apriltag::getZ(){
 	return this->pose[2];
 }
+double Apriltag::getVx(){
+	return this->speed[0];
+}
+double Apriltag::getVy(){
+	return this->speed[1];
+}
+double Apriltag::getVz(){
+	return this->speed[2];
+}
 void Apriltag::update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq){
 	pose = ppos;
 	q = qq;

@@ -16,6 +16,9 @@ class Apriltag{
 		double getX();
 		double getY();
 		double getZ();
+		double getVx();
+		double getVy();
+		double getVz();
 	private:
 		unsigned int id ;
 		float size; //m
