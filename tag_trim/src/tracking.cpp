@@ -26,42 +26,29 @@ inline Eigen::Vector3d q2rpy_deg(Eigen::Quaterniond q){
 }
 */
 
-void Tracking2::setWindowParam(ApriltagDetector apriltag_detector){
-	/*
-	for (int i=0;i<apriltag_detector.savedApriltagsLength();i++){ 
-		setPose2Uv(apriltag_detector.getApriltag(i));
-		lefttop.x=uv(0)-0.5*window_w;
-		lefttop.y=uv(1)-0.5*window_h;
-		rightbottom.x=uv(0)+0.5*window_w;
-		rightbottom.y=uv(1)+0.5*window_h;
-		ltrb[0] = lefttop;
-		ltrb[1] = rightbottom;
-		//ltrb[0] = {uv(0)-0.5*window_w,uv(1)-0.5*window_h};
-		//ltrb[1] = {uv(0)+0.5*window_w,uv(1)+0.5*window_h};
-		ltrbs[i] = ltrb;
-	}
-	*/
+void Tracking2::setWindowParam(ApriltagDetector &apriltag_detector,
+        const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg){
+    ltrbs.clear();
+    for(int i=0; i<msg->detections.size(); i++){
+        uv_apriltag.setPose2Uv( apriltag_detector.getApriltag( msg->detections[i].id[0] ));
+        ltrbs.push_back( uv_apriltag.getltrb() );
+    }
 }
-std::vector<cv::Point> Tracking2::getWindowParam(ApriltagDetector apriltag_detector,unsigned int id){
-		setPose2Uv(apriltag_detector.getApriltag(id));
-		lefttop.x=uv(0)-0.5*tag_window_w;
-		lefttop.y=uv(1)-0.5*tag_window_h;
-		rightbottom.x=uv(0)+0.5*tag_window_w;
-		rightbottom.y=uv(1)+0.5*tag_window_h;
-		if(lefttop.x<0)lefttop.x = 0;
-		if(lefttop.y<0)lefttop.y = 0;
-		if(rightbottom.x>img_size[0])rightbottom.x = img_size[0];
-		if(rightbottom.y>img_size[1])rightbottom.y = img_size[1];
-		if(lefttop.x > rightbottom.x || lefttop.y > rightbottom.y ){
-			std::cout << "error tracking.cpp" << std::endl;
-			exit(0);
-		}
-
-
-
-		ltrb[0] = lefttop;
-		ltrb[1] = rightbottom;
-		return ltrb;
+void Tracking2::setWindowParam(ApriltagDetector &apriltag_detector,
+        const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg, cv::Mat &smoothedMat){
+    ltrbs.clear();
+    for(int i=0; i<msg->detections.size(); i++){
+        uv_apriltag.setPose2Uv( apriltag_detector.getApriltag( msg->detections[i].id[0] ));
+        ltrbs.push_back( uv_apriltag.getltrb() );
+    }
+}
+std::vector<cv::Point> Tracking2::getltrb(void)
+{
+    return uv_apriltag.getltrb();
+}
+std::vector<std::vector<cv::Point>> Tracking2::getWindowParam(void)
+{
+    return ltrbs;
 }
 
 

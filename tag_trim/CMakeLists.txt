@@ -114,7 +114,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
+#INCLUDE_DIRS include
   LIBRARIES tag_trim
   CATKIN_DEPENDS roscpp rospy std_msgs
 #	DEPENDS
@@ -242,16 +242,24 @@ set(tag_trim_src
 	src/uv_apriltag.cpp
 	src/camera.h
 	src/camera.cpp
-	src/image_grabber.h
-	src/image_grabber.cpp
+    src/image_grabber/image_grabber.h
+    src/image_grabber/image_grabber.cpp
+    src/image_grabber/image_grabber_ros_usb_cam.h
+    src/image_grabber/image_grabber_ros_usb_cam.cpp
+
+    src/Real-Time-Video-Stabilization/stabilization.h
+    src/Real-Time-Video-Stabilization/stabilization.cpp
+    src/Real-Time-Video-Stabilization/my_videostab.h
+    src/Real-Time-Video-Stabilization/my_videostab.cpp
+
 )
 add_executable(${PROJECT_NAME}_image_trim_node
-	src/image_trim_main.cpp 
+	src/image_trim_main.cpp
 	${tag_trim_src}
 )
 add_dependencies(${PROJECT_NAME}_image_trim_node  ${PROJECT_NAME}_generate_messages_cpp)
 
-target_link_libraries(${PROJECT_NAME}_image_trim_node 
+target_link_libraries(${PROJECT_NAME}_image_trim_node
 	${catkin_LIBRARIES}
 	${OpenCV_LIBRARIES}
 )#${Eigen3_LIBRARIES})
@@ -269,24 +277,28 @@ set(nodelet_tag_trim_src
 	src/uv_apriltag.cpp
 	src/camera.h
 	src/camera.cpp
+    #src/image_grabber/image_grabber.h
+    #src/image_grabber/image_grabber.cpp
+
+
 )
 #add_library(${PROJECT_NAME}_plugin_nodelet_image_trim
-#	src/plugin_nodelet_image_trim_main.cpp 
+#	src/plugin_nodelet_image_trim_main.cpp
 #	${nodelet_tag_trim_src}
 #)
-#target_link_libraries(${PROJECT_NAME}_plugin_nodelet_image_trim 
+#target_link_libraries(${PROJECT_NAME}_plugin_nodelet_image_trim
 #	${catkin_LIBRARIES}
 #	${OpenCV_LIBRARIES}
 #)#${Eigen3_LIBRARIES})
 
 add_library(${PROJECT_NAME}_plugin_nodelet_image_trim_node
-	src/plugin_nodelet_image_trim_main.cpp 
+	src/plugin_nodelet_image_trim_main.cpp
 	${nodelet_tag_trim_src}
 )
-add_dependencies(${PROJECT_NAME}_plugin_nodelet_image_trim_node 
+add_dependencies(${PROJECT_NAME}_plugin_nodelet_image_trim_node
 	${catkin_EXPORTED_TARGETS}
 	${PROJECT_NAME}_generate_messages_cpp)
-target_link_libraries(${PROJECT_NAME}_plugin_nodelet_image_trim_node 
+target_link_libraries(${PROJECT_NAME}_plugin_nodelet_image_trim_node
 	${catkin_LIBRARIES}
 	${OpenCV_LIBRARIES}
 )#${Eigen3_LIBRARIES})
@@ -315,7 +327,7 @@ add_executable(${PROJECT_NAME}_particle_node
 )
 #add_dependencies(${PROJECT_NAME}_image_trim_node  ${PROJECT_NAME}_generate_messages_cpp)
 #
-target_link_libraries(${PROJECT_NAME}_particle_node 
+target_link_libraries(${PROJECT_NAME}_particle_node
 	${catkin_LIBRARIES}
 	${OpenCV_LIBRARIES}
 )#${Eigen3_LIBRARIES})

@@ -1,5 +1,6 @@
 #include"camera.h"
 Eigen::Matrix<double,3,4> Camera::A;
+Eigen::Matrix<double,3,3> Camera::A3x3;//カメラ内部パラメータ
 Eigen::Matrix<double,3,3> Camera::K;
 void Camera::setICP(const sensor_msgs::CameraInfo::ConstPtr &info){
 	camera_info = *info;
