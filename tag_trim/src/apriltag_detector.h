@@ -2,6 +2,7 @@
 #define APRILTAG_DETECTOR_H
 
 #include "apriltag.h"
+#include "uv_apriltag.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -13,13 +14,13 @@ class ApriltagDetector {
 		ApriltagDetector(){};
 		~ApriltagDetector(){};
 
-		Apriltag getApriltag(unsigned int id);
 		//void setApriltag(int id,Eigen::Vector3d pose,Eigen::Quaterniond q,float size);
+		Apriltag* getApriltag(unsigned int id);
 		void setApriltag(const apriltag_ros::AprilTagDetection &detect);
 		int savedApriltagsLength();
 
 		std::vector<Apriltag> apriltags;
-		std::vector<Apriltag> *p_apriltags;
+		//std::vector<UvApriltag> uv_apriltags;
 
 	private:
 		Apriltag obj_apriltag;

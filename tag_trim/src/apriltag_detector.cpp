@@ -1,8 +1,8 @@
 #include "apriltag_detector.h"
 
-Apriltag ApriltagDetector::getApriltag(unsigned int id){
+Apriltag* ApriltagDetector::getApriltag(unsigned int id){
 	index = findID(id);
-	return apriltags[index];
+	return &apriltags[index];
 }
 //void ApriltagDetector::setApriltag(int id,Eigen::Vector3d pose, Eigen::Quaterniond q ,float size){
 void ApriltagDetector::setApriltag(const apriltag_ros::AprilTagDetection &detect){
@@ -19,8 +19,7 @@ void ApriltagDetector::setApriltag(const apriltag_ros::AprilTagDetection &detect
 	index = findID(id);
 
 	if(index >= 0){
-		
-		updateTag(&apriltags[index], id, pose, q); 
+		updateTag(&apriltags[index], id, pose, q);
 	}
 	else{
 		Apriltag tag(id,pose,q,size);

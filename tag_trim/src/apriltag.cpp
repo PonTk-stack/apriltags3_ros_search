@@ -8,9 +8,10 @@ void Apriltag::update(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond q
 
 	}
 	else{
-		std::cout << "error:apriltag.cpp void update() /"<< id << " is miss-match"<<std::endl;
+		std::cerr << "error:apriltag.cpp void update() /"<< id << " is miss-match"<<std::endl;
 		exit(0);
 	}
+
 }
 void Apriltag::reset(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq){
 	if(id = iid){
@@ -18,24 +19,35 @@ void Apriltag::reset(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq
 		reset_velocity();
 	}
 	else{
-		std::cout << "error:apriltag.cpp void reset()/ "<< id << " is miss-match"<<std::endl;
+		std::cerr << "error:apriltag.cpp void reset()/ "<< id << " is miss-match"<<std::endl;
 		exit(0);
 	}
 }
 Eigen::Quaterniond Apriltag::getQuaterniond(){
 	return this->q;
+
 }
 float Apriltag::getSize(){
 	return this->size;
 }
 double Apriltag::getX(){
 	return this->pose[0];
+
 }
 double Apriltag::getY(){
 	return this->pose[1];
 }
 double Apriltag::getZ(){
 	return this->pose[2];
+}
+double Apriltag::getVx(){
+	return this->speed[0];
+}
+double Apriltag::getVy(){
+	return this->speed[1];
+}
+double Apriltag::getVz(){
+	return this->speed[2];
 }
 void Apriltag::update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq){
 	pose = ppos;
@@ -53,6 +65,7 @@ void Apriltag::update_velocity(Eigen::Vector3d ppos,Eigen::Quaterniond qq){
 	///vy = yy-y;
 	//vz = zz-z;
 	speed = ppos - pose;
+
 	vq.w() = qq.w() - q.w();
 	vq.x() = qq.x() - q.x();
 	vq.y() = qq.y() - q.y();
