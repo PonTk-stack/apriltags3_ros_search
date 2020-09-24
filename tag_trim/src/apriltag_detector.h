@@ -17,6 +17,7 @@ class ApriltagDetector {
 		//void setApriltag(int id,Eigen::Vector3d pose,Eigen::Quaterniond q,float size);
 		Apriltag* getApriltag(unsigned int id);
 		void setApriltag(const apriltag_ros::AprilTagDetection &detect);
+		void resetApriltagVel();
 		int savedApriltagsLength();
 
 		std::vector<Apriltag> apriltags;

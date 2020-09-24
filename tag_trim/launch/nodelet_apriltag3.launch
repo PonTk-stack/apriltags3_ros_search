@@ -1,4 +1,8 @@
 <launch>
+	<node name="image_proc" pkg="image_proc" type="image_proc" ns="usb_cam">
+		<remap from="image_raw" to="/usb_cam/image_raw" />
+		<remap from="camera_info" to="/usb_cam/camera_info" />
+	</node>
   <arg name="launch_prefix" default="" /> <!-- set to value="gdbserver localhost:10000" for remote debugging -->
   <arg name="node_namespace" default="apriltag_ros_continuous_node" />
   <arg name="camera_name" default="/image_trim_node" />
@@ -44,7 +48,10 @@
   </group>
 
 	<arg name="manager_name" default="nodelet_manager" />
-	<node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen"/>
+  <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
+    <param name="num_worker_threads" value="4" />
+  </node>
+
 	<node pkg="nodelet" type="nodelet" name="tag_trim_nodelet_node"
 		args="load tag_trim/ImageConverter $(arg manager_name)"
 		output="screen">

@@ -30,6 +30,7 @@ sensor_msgs::CameraInfoPtr ImageGrabberRosUsbCam::getInfoMsg(){
 
 bool ImageGrabberRosUsbCam::grabFrame(const sensor_msgs::ImageConstPtr &msg,const sensor_msgs::CameraInfo::ConstPtr &info){
     bool imgflag,infoflag;
+
     imgflag = catch_msg2BGR(msg);
     infoflag = usbCamSetICP(info);
     if(imgflag &&infoflag){return true;}
@@ -56,8 +57,8 @@ bool ImageGrabberRosUsbCam::getSmoothedImage(cv::Mat &dst_img){
         std::cerr << "invaild image in image_grabber from ImageGrabberRosUsbCam::getSmoothedImage() " << std::endl;
         return false;
     }else {
-        cv::imshow("ImageGrabberRosUsbCam::getSmoothedImage",img);
-        cv::waitKey(1);
+        //cv::imshow("ImageGrabberRosUsbCam::getSmoothedImage",img);
+        //cv::waitKey(1);
         std::lock_guard<std::mutex> lock_img(lock_obj);
         image_stabilizer.getSmoothedFrame(img,dst_img);
         //img.copyTo(dst_img);
@@ -69,8 +70,8 @@ bool ImageGrabberRosUsbCam::getSmoothedImageAndMat(cv::Mat &dst_img,cv::Mat &mat
         std::cerr << "invaild image in image_grabber from ImageGrabberRosUsbCam::getSmoothedImage() " << std::endl;
         return false;
     }else {
-        cv::imshow("ImageGrabberRosUsbCam::getSmoothedImageAndMat",img);
-        cv::waitKey(1);
+        //cv::imshow("ImageGrabberRosUsbCam::getSmoothedImageAndMat",img);
+        //cv::waitKey(1);
         std::lock_guard<std::mutex> lock_img(lock_obj);
         image_stabilizer.getSmoothedFrameAndMat(img,dst_img,mat);
         //img.copyTo(dst_img);
@@ -84,9 +85,10 @@ bool ImageGrabberRosUsbCam::catch_msg2BGR(const sensor_msgs::ImageConstPtr& msg)
      try {
         std::lock_guard<std::mutex> lock_img(lock_obj);
         if(channel == 1){
-         //img = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8)->image;
-         cv_img_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
-         cv::cvtColor(cv_img_ptr->image, img, CV_BGR2GRAY);
+         //cv_img_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
+         //cv::cvtColor(cv_img_ptr->image, img, CV_BGR2GRAY);
+         cv_img_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
+         cv_img_ptr->image.copyTo(img);
         }
         else if (channel == 3){
          img = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8)->image;

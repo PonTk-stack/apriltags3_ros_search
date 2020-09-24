@@ -31,22 +31,6 @@
 #include "apriltag_detector.h"
 #include "tracking.h"
 //#include "image_grabber/image_grabber.h"
-#include "image_grabber/image_grabber_ros_usb_cam.h"
-#include "/home/taisuke/File-Manager/CSVWriter/csv_manager.h"
-
-#include <condition_variable>
-#include <ros/callback_queue.h>
-
-#include <chrono>
-std::chrono::system_clock::time_point start;
-
-std::chrono::duration<double> timer ;
-std::chrono::system_clock::time_point end;
-
-#include <mutex>
-
-const double PI = 3.14159265358979323846;
-typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,sensor_msgs::CameraInfo> MySyncPolicy; 
 
 class ROSCommonNode
 {
@@ -58,16 +42,15 @@ class ROSCommonNode
 };
 
 
-bool ready_exc;
+
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,sensor_msgs::CameraInfo> MySyncPolicy; 
 
 namespace nodelet_image_trim{
 
     class ImageConverter :  public nodelet::Nodelet   {
 
-
         private:
             ros::NodeHandle nh;
-            ros::NodeHandle nh2;
             ros::NodeHandle pnh;
 
             image_transport::Subscriber image_sub ;
@@ -87,75 +70,63 @@ namespace nodelet_image_trim{
 
             message_filters::Synchronizer<MySyncPolicy> *sync;//(MySyncPolicy(10), image_sub_mf, info_sub_mf);
 
+            const int img_size[2] = {1280,720};
+
+            cv::Mat image_ori;
+            cv::Mat image_trim;
+            cv::Mat image_conved = cv::Mat::zeros(img_size[0],img_size[1],CV_8UC3);
+
+            cv::Point lefttop,rightbottom;
+            int pv_cx,pv_cy,pv_w,pv_h;
 
             bool detect_flag = false;
 
             Eigen::Matrix<int,2,1> p1,p2,p3,p4;
             bool drawpoint_flag =false;
 
+
             Tracking2 track2;
 
             ApriltagDetector apriltag_detector;
 
-            const int imgsize[2] = {1280,720};
-            int channel = 1; // if you change it, please change image_trim.h :78
-            ImageGrabberRosUsbCam   igruc = ImageGrabberRosUsbCam(0,imgsize[0],imgsize[1],channel);
-
-            cv::Mat image_ori = cv::Mat::zeros(imgsize[1],imgsize[0],CV_8UC3);
-            cv::Mat image_trim;
-            cv::Mat image_conved;
-
-            std::vector<cv::Point> ltrb;
-            cv::Point lefttop,rightbottom;
-
-            int count = 0;
-            int count_err = 0;
-
-            CsvManager csvm;
-
-
+//            ImageGrabber ig;
         public:
             virtual void onInit();
             ImageConverter();
-            ~ImageConverter();
             void imgconvCallback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfo::ConstPtr &info);
             void TagDetectCallback(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg);
             void InfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info);
-            //void RectanglePoint(const apriltag_ros::AprilTagDetection &detect);
+            void RectanglePoint(const apriltag_ros::AprilTagDetection &detect);
             void paste(cv::Mat dst, cv::Mat src, int x, int y);
             void stampText(cv::Mat dst,Tracking2 track);
             cv::Mat tool(cv::Mat image_ori);
-
-
-static void ppp(){
-
-    std::cout << "################" << std::endl;
-}
     };
 }
-inline Eigen::Vector3d q2rpy_deg(Eigen::Quaterniond q){
-	double qx = q.x();
-	double qy = q.y();
-	double qz = q.z();
-	double qw = q.w();
-	double sinr_cosp = 2.0 * (qw * qx + qy * qz);
-	double cosr_cosp = 1.0 - 2.0 * (qx * qx + qy * qy);
-	double roll = atan2(sinr_cosp,cosr_cosp);
-	double sinp = 2.0 * (qw * qy - qz * qx);
-	double pitch;
-	if (abs(sinp) >= 1){pitch = PI / 2;}
-	else{pitch = asin(sinp);}
-	double siny_cosp = 2.0 * (qw * qz + qx * qy);
-	double cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
-	double yaw = atan2(siny_cosp, cosy_cosp);
-	if(cosy_cosp<0){
-		if(siny_cosp >= 0) yaw+=180*PI/180;
-		if(siny_cosp <  0) yaw-=180*PI/180;
-	}
-	std::cout <<yaw*180/PI<<" "<<  roll*180/PI<< " "<<pitch*180/PI<<std::endl;
-	Eigen::Vector3d v(yaw*180/PI,roll*180/PI,pitch*180/PI );
-	return v;
-};
+/*
+   inline Eigen::Vector3d Tracking::q2rpy_deg(Eigen::Quaterniond q){
+   double qx = q.x();
+   double qy = q.y();
+   double qz = q.z();
+   double qw = q.w();
+   double sinr_cosp = 2.0 * (qw * qx + qy * qz);
+   double cosr_cosp = 1.0 - 2.0 * (qx * qx + qy * qy);
+   double roll = atan2(sinr_cosp,cosr_cosp);
+   double sinp = 2.0 * (qw * qy - qz * qx);
+   double pitch;
+   if (abs(sinp) >= 1){pitch = PI / 2;}
+   else{pitch = asin(sinp);}
+   double siny_cosp = 2.0 * (qw * qz + qx * qy);
+   double cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
+   double yaw = atan2(siny_cosp, cosy_cosp);
+   if(cosy_cosp<0){
+   if(siny_cosp >= 0) yaw+=180*PI/180;
+   if(siny_cosp <  0) yaw-=180*PI/180;
+   }
+   std::cout <<yaw*180/PI<<" "<<  roll*180/PI<< " "<<pitch*180/PI<<std::endl;
+   Eigen::Vector3d v(yaw*180/PI,roll*180/PI,pitch*180/PI );
+   return v;
+   }
+   */
 
 
 #endif //NODELET_IMAGE_TRIM_H

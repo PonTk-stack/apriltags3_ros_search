@@ -30,12 +30,10 @@ ImageConverter::ImageConverter(int argc,char** argv,const char* node_name): ROSC
     sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10) , image_sub_mf,info_sub_mf); 
     sync->registerCallback(boost::bind(&ImageConverter::imgconvCallback ,this, _1, _2));
 
-
-
     lefttop.x = 0;
     lefttop.y = 0;
-    rightbottom.x = img_size[0];
-    rightbottom.y = img_size[1];
+    rightbottom.x = igruc.getWindowWidth();//img_size[0];
+    rightbottom.y = igruc.getWindowHeight();//img_size[1];
 }
 
 
@@ -66,13 +64,7 @@ cv::Mat ImageConverter::tool(cv::Mat image){
 void ImageConverter::imgconvCallback(const sensor_msgs::ImageConstPtr& msg  , const sensor_msgs::CameraInfo::ConstPtr &info){
     //igruc.setMsg(msg ,info);
     bool f = igruc.grabFrame(msg ,info);
-    try {
-        image_ori = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8)->image;
-    }
-    catch (cv_bridge::Exception& e) {
-        ROS_ERROR("cv_bridge exception: %s", e.what());
-    }
-    //igruc.getImage(image_ori);
+    igruc.getImage(image_ori);
     //igruc.getSmoothedImage(image_ori);
     cv::Mat stabedMat;
     igruc.getSmoothedImageAndMat(image_ori,stabedMat);
@@ -191,8 +183,8 @@ void ImageConverter::TagDetectCallback(const apriltag_ros::AprilTagDetectionArra
         drawpoint_flag = false;
         lefttop.x = 0;
         lefttop.y = 0;
-        rightbottom.x = img_size[0];
-        rightbottom.y = img_size[1];
+        rightbottom.x = igruc.getWindowWidth();//img_size[0];
+        rightbottom.y = igruc.getWindowHeight();//img_size[1];
     }
 }
 
