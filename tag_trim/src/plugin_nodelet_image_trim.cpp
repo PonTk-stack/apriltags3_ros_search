@@ -2,26 +2,30 @@
 
 #include <pluginlib/class_list_macros.h>
 
-void callback(const sensor_msgs::ImageConstPtr& image,const sensor_msgs::CameraInfoConstPtr& cam_info){
-}
 
 namespace nodelet_image_trim{
 
-    ImageConverter::ImageConverter(){}
+    ImageConverter::ImageConverter(){
+        //csvm.newFile();
+        csvm.newFile();
+        csvm.csv.newRow() << "detect" << "K_safe" << "K_uv_vel" << "K_tag_vel"
+            << "pixel";
+
+        
+    }
+    ImageConverter::~ImageConverter(){
+        csvm.write();
+    };
 
     void ImageConverter::onInit(){
 
-        nh = getNodeHandle();
-
+        nh = getMTNodeHandle();
         pnh = getPrivateNodeHandle();
 
         //ros::init(argc, argv,node_name);
 
         image_transport::ImageTransport it(nh);
 
-        //	image_sub = it.subscribe("image_topic", 10, &ImageConverter::imgconvCallback,this);
-        //	camera_info_sub = nh.subscribe("camera_info_topic",10,&ImageConverter::InfoCallback,this);
-        tag_detection_sub = nh.subscribe("tag_topic", 10, &ImageConverter::TagDetectCallback,this);
 
         image_pub = it.advertise("image_trim_node/image_trimmed", 10);
         camera_info_pub = nh.advertise<sensor_msgs::CameraInfo>("image_trim_node/camera_info", 10);
@@ -29,110 +33,82 @@ namespace nodelet_image_trim{
         image_sub_mf.subscribe(nh,"image_topic", 1);
         info_sub_mf.subscribe(nh,"camera_info_topic", 1);
 
-        //	message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), image_sub_mf, info_sub_mf);
-        //	sync.registerCallback(boost::bind(&ImageConverter::imgconvCallback ,this, _1, _2));
 
         sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10) , image_sub_mf,info_sub_mf); 
         sync->registerCallback(boost::bind(&ImageConverter::imgconvCallback ,this, _1, _2));
 
+        //tag_detection_sub = nh.subscribe("tag_topic", 10, &ImageConverter::TagDetectCallback,this);
+        tag_detection_sub = nh.subscribe("tag_topic", 10, &ImageConverter::TagDetectCallback,this);
+
+
         lefttop.x = 0;
         lefttop.y = 0;
-        rightbottom.x = img_size[0];
-        rightbottom.y = img_size[1];
+        rightbottom.x = igruc.getWindowWidth();//img_size[0];
+        rightbottom.y = igruc.getWindowHeight();//img_size[1];
+ready_exc = true;
     }
 
+    void ImageConverter::imgconvCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfo::ConstPtr &info){
 
-    void ImageConverter::InfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info){
-        //track2.setICP(info);
-        //ig.setICP(info);
-        camera_info = *info;
-    }
+        if(ready_exc)
+        {
+            start = std::chrono::system_clock::now();
+        ready_exc = false;
+        bool f = igruc.grabFrame(msg ,info);
+        igruc.getImage(image_ori);
 
-    cv::Mat ImageConverter::tool(cv::Mat image){
-        if(!image.data) {
-            std::cout << "Error: the image wasn't correctly loaded." << std::endl;
-            exit(1);
-        }
-        // We iterate over all pixels of the image
-        for(int r = 0; r < image.rows; r++) {
-            // We obtain a pointer to the beginning of row r
-            cv::Vec3b* ptr = image.ptr<cv::Vec3b>(r);
-            for(int c = 0; c < image.cols; c++) {
-                // We invert the blue and red values of the pixel
-                //            ptr[c] = cv::Vec3b(ptr[c][2],ptr[c][1],ptr[c][0]);
+        //cv::Mat stabedMat;
+        //igruc.getSmoothedImageAndMat(image_ori,stabedMat);
+
+            if(detect_flag){
+                image_conved = cv::Mat::zeros(image_ori.rows,image_ori.cols,CV_8UC1);
+        //        cv::Mat image_conved = cv::Mat::zeros(image_ori.rows,image_ori.cols,CV_8UC3);
+
+                cv::Rect roi(lefttop, cv::Size(rightbottom.x-lefttop.x, rightbottom.y-lefttop.y));
+                image_trim = image_ori(roi); // 切り出し画像
+                //paste(image_conved,image_trim,lefttop.x,lefttop.y);
+                image_trim.copyTo(image_conved(cv::Range(lefttop.y,rightbottom.y),
+                                                cv::Range(lefttop.x,rightbottom.x ) ));
+
+                img_msg = igruc.getImageMsg(image_conved);
+                   if(drawpoint_flag){
+                       stampText(image_conved,track2);
+                   }
+                   //cv::imshow("image_conved", image_conved);
+                   //cv::waitKey(1);
             }
+            else{
+                img_msg = igruc.getImageMsg(image_ori);
+            }
+            camera_info_ptr = igruc.getInfoMsg();
+
+            img_msg->header.stamp = ros::Time::now();
+            camera_info_ptr->header.stamp = img_msg->header.stamp;
+
+            image_pub.publish(img_msg);
+            camera_info_pub.publish(camera_info_ptr);
+
+            std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+            timer += (end - start);
+            std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(timer).count()
+                << "ms: "<< count << " , " << count_err  << std::endl;
         }
-        return image;
-    }
-
-
-    void ImageConverter::imgconvCallback(const sensor_msgs::ImageConstPtr& msg  , const sensor_msgs::CameraInfo::ConstPtr &info){
-
-        try {
-            image_ori = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8)->image;
-        }
-        catch (cv_bridge::Exception& e) {
-            ROS_ERROR("cv_bridge exception: %s", e.what());
-        }
-        InfoCallback(info);
-
-        if(detect_flag){
-            cv::Mat image_conved = cv::Mat::zeros(image_ori.rows,image_ori.cols,CV_8UC3);
-            //ROS_INFO_STREAM(image_ori.cols );
-            //cv::rectangle(image_conved, lefttop, rightbottom, cv::Scalar(0,0,255), -1, CV_AA);
-            cv::Rect roi(lefttop, cv::Size(rightbottom.x-lefttop.x, rightbottom.y-lefttop.y));
-            image_trim = image_ori(roi); // 切り出し画像
-            //paste(image_conved,image_trim,pv_cx,pv_cy);
-            paste(image_conved,image_trim,lefttop.x,lefttop.y);
-
-            img_msg = cv_bridge::CvImage(std_msgs::Header(),"bgr8", image_conved).toImageMsg();
-            /*
-               if(drawpoint_flag){ 
-
-               cv::circle(image_conved, cv::Point(p1(0), p1(1)), 5, cv::Scalar(0,0,200), 1);
-               cv::circle(image_conved, cv::Point(p2(0), p2(1)), 5, cv::Scalar(0,0,200), 1);
-               cv::circle(image_conved, cv::Point(p3(0), p3(1)), 5, cv::Scalar(0,0,200), 1);
-               cv::circle(image_conved, cv::Point(p4(0), p4(1)), 5, cv::Scalar(0,0,200), 1);
-               stampText(image_conved,track); 
-               }
-               cv::imshow("image_conved", image_conved);
-               cv::waitKey(1);
-               */
-        }
-        else{
-            //image_conved = image_ori.clone();
-            image_ori.copyTo(image_conved);
-            //		cv::imshow("(published) image_conved", image_conved);
-            //		cv::waitKey(1);
-            img_msg = cv_bridge::CvImage(std_msgs::Header(),"bgr8", image_conved).toImageMsg();
-        }
-
-        camera_info_ptr = boost::make_shared<sensor_msgs::CameraInfo>(camera_info);
-
-        img_msg->header.stamp = ros::Time::now();
-        camera_info_ptr->header.stamp = img_msg->header.stamp;
-
-        image_pub.publish(img_msg);
-        camera_info_pub.publish(camera_info_ptr);
-
     }
 
 
     void ImageConverter::stampText(cv::Mat dst,Tracking2 track){
-        //	std::stringstream ss;
-        //	ss << track.id;
-        //	cv::String text = ss.str();
         const int fontface = cv::FONT_HERSHEY_SCRIPT_SIMPLEX;
         const double fontscale = 0.5;
-        //	int baseline;
-        //	cv::Size textsize = cv::getTextSize(text, fontface,
-        //																			fontscale, 2, &baseline);
+
+        cv::circle(dst, track.getP1(), 5, cv::Scalar(0,0,200), 3);
+        cv::circle(dst, track.getP2(), 5, cv::Scalar(0,0,200), 3);
+        cv::circle(dst, track.getP3(), 5, cv::Scalar(0,0,200), 3);
+        cv::circle(dst, track.getP4(), 5, cv::Scalar(0,0,200), 3);
+
         cv::putText(dst, "p1",track.getP1(),
                 fontface, fontscale, cv::Scalar(0xff, 0x99, 0), 1);
-
         cv::putText(dst, "p2",track.getP2(),
                 fontface, fontscale, cv::Scalar(0xff, 0x99, 0), 1);
-
         cv::putText(dst, "p3",track.getP3(),
                 fontface, fontscale, cv::Scalar(0xff, 0x99, 0), 1);
         cv::putText(dst, "p4",track.getP4(),
@@ -141,6 +117,7 @@ namespace nodelet_image_trim{
 
 
     void ImageConverter::paste(cv::Mat dst, cv::Mat src, int x, int y) {
+
         cv::Mat resized_img = src;
         int width = src.rows;
         int height = src.cols;
@@ -159,49 +136,39 @@ namespace nodelet_image_trim{
         roi_resized.copyTo(roi_dst);
     }
 
-
-    void ImageConverter::RectanglePoint(const apriltag_ros::AprilTagDetection &detect){
-
-        pv_w = std::max({detect.pxdata[0],detect.pxdata[1],detect.pxdata[2],detect.pxdata[3]}) - std::min({detect.pxdata[0],detect.pxdata[1],detect.pxdata[2],detect.pxdata[3]});
-
-        pv_h = std::max({detect.pydata[0],detect.pydata[1],detect.pydata[2],detect.pydata[3]}) - std::min({detect.pydata[0],detect.pydata[1],detect.pydata[2],detect.pydata[3]});
-
-        pv_cx = (detect.pxdata[0]+detect.pxdata[1]+detect.pxdata[2]+detect.pxdata[3])/4;
-
-        pv_cy = (detect.pydata[0]+detect.pydata[1]+detect.pydata[2]+detect.pydata[3])/4;
-
-    }
-
-
     void ImageConverter::TagDetectCallback(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg){
 
-        XmlRpc::XmlRpcValue params;
-        nh.getParam("/apriltags3_param", params);
-
-
-        if(msg->detections.size()){
-            detect_flag = true;
-            int i,t;
-
-            for(i=0;i<msg->detections.size();i++){
-                //std::vector<apriltag_ros::AprilTagDetectionArray> it;
-                apriltag_detector.setApriltag(msg->detections[i]);
-                //std::vector<cv::Point> ltrb = track2.getWindowParam(apriltag_detector,msg->detections[i].id[0]);
-                //lefttop = ltrb[0];
-                //rightbottom = ltrb[1];
-
-                drawpoint_flag = true;
+        {
+            //XmlRpc::XmlRpcValue params;
+            //nh.getParam("/apriltags3_param", params);
+            if(msg->detections.size()){
+                detect_flag = true;
+                int i,t;
+                count++;
+                for(i=0;i<msg->detections.size();i++){
+                    apriltag_detector.setApriltag(msg->detections[i]);
+                    //drawpoint_flag = true;
+                }
+                track2.setWindowParam(apriltag_detector,msg);
+                ltrb = track2.getltrb();
+                lefttop = ltrb[0];
+                rightbottom = ltrb[1];
             }
+            else{
+                apriltag_detector.resetApriltagVel();
+                if(count > 0) count_err++;
+                detect_flag = false;
+                drawpoint_flag = false;
+                lefttop.x = 0;
+                lefttop.y = 0;
+                rightbottom.x = igruc.getWindowWidth();//img_size[0];
+                rightbottom.y = igruc.getWindowHeight();//img_size[1];
+            }
+            csvm.csv.newRow() << detect_flag << track2.getK_safe()
+                    << track2.getK_uv_vel() << track2.getK_tag_vel()
+                    <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y) ;
         }
-        else{
-            detect_flag = false;
-            drawpoint_flag = false;
-            lefttop.x = 0;
-            lefttop.y = 0;
-            rightbottom.x = img_size[0];
-            rightbottom.y = img_size[1];
-
-        }
+        ready_exc = true;
     }
 }
 PLUGINLIB_EXPORT_CLASS(nodelet_image_trim::ImageConverter , nodelet::Nodelet)

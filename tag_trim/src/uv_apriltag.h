@@ -16,6 +16,9 @@ class UvApriltag: public Camera{
 		UvApriltag():Camera()
         {
             ltrb = {lefttop , rightbottom};
+            tag_velK = 0.95;
+            anzenK =1.1;
+            uv_velK = 0.0;
         };
 		~UvApriltag(){};
 
@@ -34,6 +37,12 @@ class UvApriltag: public Camera{
 		cv::Point getP2(){return cv::Point(p2(0),p2(1));};
 		cv::Point getP3(){return cv::Point(p3(0),p3(1));};
 		cv::Point getP4(){return cv::Point(p4(0),p4(1));};
+        float getanzenK() {return anzenK;}
+        float getuv_velK() {return uv_velK;}
+        float gettag_velK() {return tag_velK;}
+        void setanzenK(float gain) {anzenK = gain;}
+        void setuv_velK(float gain) {uv_velK = gain;}
+        void settag_velK(float gain) {tag_velK = gain;}
 	private:
     //    Apriltag tag_obj;
         Eigen::Vector4d c_m4;
@@ -51,6 +60,10 @@ class UvApriltag: public Camera{
         Eigen::Vector2f p1,p2,p3,p4;
         std::vector<cv::Point> ltrb; //[p,p]
         cv::Point lefttop,rightbottom;
+
+        float anzenK;
+        float uv_velK;
+        float tag_velK;
 
 };
 

@@ -61,13 +61,6 @@ class ImageConverter  : ROSCommonNode   {
 
 		message_filters::Synchronizer<MySyncPolicy> *sync;//(MySyncPolicy(10), image_sub_mf, info_sub_mf);
 
-		const int img_size[2] = {1280,720};
-
-		cv::Mat image_ori;
-		cv::Mat image_trim;
-		cv::Mat image_conved;
-
-		cv::Point lefttop,rightbottom;
 
 		bool detect_flag = false;
 
@@ -77,8 +70,16 @@ class ImageConverter  : ROSCommonNode   {
 		Tracking2 track2;
 		ApriltagDetector apriltag_detector  ;
 
+		const int imgsize[2] = {1280,720};
+        
         int channel = 1; // if you change it, please change image_trim.h :78
-        ImageGrabberRosUsbCam   igruc = ImageGrabberRosUsbCam(0,1280,720,channel);
+        ImageGrabberRosUsbCam   igruc = ImageGrabberRosUsbCam(0,imgsize[0],imgsize[1],channel);
+
+        cv::Mat image_ori = cv::Mat::zeros(imgsize[1],imgsize[0],CV_8UC3);
+		cv::Mat image_trim;
+		cv::Mat image_conved;
+
+		cv::Point lefttop,rightbottom;
 	public:
 		ImageConverter(int argc, char** argv,const char* node_name);
 		void imgconvCallback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfo::ConstPtr &info);

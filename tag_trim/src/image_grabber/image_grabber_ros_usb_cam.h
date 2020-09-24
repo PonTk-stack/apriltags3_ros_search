@@ -10,6 +10,7 @@
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
+
 #include "../Real-Time-Video-Stabilization/stabilization.h"
 
 class ImageGrabberRosUsbCam:public ImageGrabber
@@ -30,6 +31,8 @@ class ImageGrabberRosUsbCam:public ImageGrabber
         static std::mutex lock_obj;
 
         Stabilization image_stabilizer;
+        int getWindowWidth(){return this->width;}
+        int getWindowHeight(){return this->height;}
         protected:
         //        std::thread capture_thread;
             int camera_device_number;
@@ -38,6 +41,7 @@ class ImageGrabberRosUsbCam:public ImageGrabber
             bool catch_msg2BGR(const sensor_msgs::ImageConstPtr& msg);
             bool usbCamSetICP(const sensor_msgs::CameraInfo::ConstPtr &info);
             //sensor_msgs::CameraInfo::ConstPtr info;
+
 
             cv_bridge::CvImagePtr cv_img_ptr;
             sensor_msgs::ImagePtr img_msg_ptr;

@@ -12,6 +12,7 @@ class Apriltag{
 		~Apriltag(){};
 		void update(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq);
 		void reset(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq);
+		void reset_velocity();
 		Eigen::Quaterniond getQuaterniond();
 		float getSize();
 		double getX();
@@ -35,7 +36,6 @@ class Apriltag{
 		void update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
 	//	void update_velocity(double xx, double yy, double zz, Eigen::Quaterniond qq);
 		void update_velocity(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
-		void reset_velocity();
 };
 
 #endif //APRILTAG_H

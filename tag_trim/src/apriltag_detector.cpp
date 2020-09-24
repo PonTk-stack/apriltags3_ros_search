@@ -27,6 +27,11 @@ void ApriltagDetector::setApriltag(const apriltag_ros::AprilTagDetection &detect
 		IDs.push_back(id);
 		}
 }
+void ApriltagDetector::resetApriltagVel(){
+    for(int i =0; i < apriltags.size() ;i++){
+        apriltags[i].reset_velocity();
+    }
+}
 int ApriltagDetector::savedApriltagsLength(){
 	return apriltags.size();
 }

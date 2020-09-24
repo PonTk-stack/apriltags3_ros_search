@@ -277,10 +277,19 @@ set(nodelet_tag_trim_src
 	src/uv_apriltag.cpp
 	src/camera.h
 	src/camera.cpp
-    #src/image_grabber/image_grabber.h
-    #src/image_grabber/image_grabber.cpp
 
+    src/image_grabber/image_grabber.h
+    src/image_grabber/image_grabber.cpp
+    src/image_grabber/image_grabber_ros_usb_cam.h
+    src/image_grabber/image_grabber_ros_usb_cam.cpp
 
+    src/Real-Time-Video-Stabilization/stabilization.h
+    src/Real-Time-Video-Stabilization/stabilization.cpp
+    src/Real-Time-Video-Stabilization/my_videostab.h
+    src/Real-Time-Video-Stabilization/my_videostab.cpp
+
+    /home/taisuke/File-Manager/CSVWriter/csv_manager.h
+    /home/taisuke/File-Manager/CSVWriter/csv_manager.cpp
 )
 #add_library(${PROJECT_NAME}_plugin_nodelet_image_trim
 #	src/plugin_nodelet_image_trim_main.cpp

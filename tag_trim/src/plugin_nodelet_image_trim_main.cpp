@@ -8,7 +8,7 @@
 
 int main(int argc,char **argv){
 	const char *nodename = "tag_trim_plugin_nodelet_image_trim_node";
-
+    ros::MultiThreadedSpinner spinner(2); // Use 4 threads
 	ros::init(argc, argv,"tag_trim_plugin_nodelet_image_trim_node");
 	nodelet::Loader nodelet;
 	nodelet::M_string remap(ros::names::getRemappings());
@@ -16,7 +16,8 @@ int main(int argc,char **argv){
 	nodelet.load(ros::this_node::getName(),
 					"ImageConverter",
 					remap, nargv);
-	ros::spin();
+	//ros::spin();
+    spinner.spin();
 	return 0;
 }
 
