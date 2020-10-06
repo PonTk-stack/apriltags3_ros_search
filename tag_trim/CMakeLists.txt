@@ -288,8 +288,11 @@ set(nodelet_tag_trim_src
     src/Real-Time-Video-Stabilization/my_videostab.h
     src/Real-Time-Video-Stabilization/my_videostab.cpp
 
-    /home/taisuke/File-Manager/CSVWriter/csv_manager.h
-    /home/taisuke/File-Manager/CSVWriter/csv_manager.cpp
+    /home/taisuke/File-Manager/csv_manager/csv_manager.h
+    /home/taisuke/File-Manager/csv_manager/csv_manager.cpp
+
+    /home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/src/bag_clock_counter.h
+    /home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/src/bag_clock_counter.cpp
 )
 #add_library(${PROJECT_NAME}_plugin_nodelet_image_trim
 #	src/plugin_nodelet_image_trim_main.cpp

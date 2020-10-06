@@ -21,6 +21,9 @@ class Apriltag{
 		double getVx();
 		double getVy();
 		double getVz();
+		double getAx();
+		double getAy();
+		double getAz();
 	private:
 		unsigned int id ;
 		float size; //m
@@ -29,13 +32,17 @@ class Apriltag{
 
 		Eigen::Vector3d pose; // (x y z)
 		Eigen::Vector3d speed; // (x y z)
+		Eigen::Vector3d accel; // (x y z)
 		//double ax,ay,az ;//acc
 		Eigen::Quaterniond q;//Quartation (w, x, y, z)
 		Eigen::Quaterniond vq;//Quartation (w, x, y, z)
 
+		Eigen::Vector3d pre_speed; // (x y z)
+
 		void update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
 	//	void update_velocity(double xx, double yy, double zz, Eigen::Quaterniond qq);
 		void update_velocity(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
+		void update_accel(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
 };
 
 #endif //APRILTAG_H

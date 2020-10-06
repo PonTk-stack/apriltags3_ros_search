@@ -32,7 +32,9 @@
 #include "tracking.h"
 //#include "image_grabber/image_grabber.h"
 #include "image_grabber/image_grabber_ros_usb_cam.h"
-#include "/home/taisuke/File-Manager/CSVWriter/csv_manager.h"
+#include "/home/taisuke/File-Manager/csv_manager/csv_manager.h"
+
+#include "/home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/src/bag_clock_counter.h"
 
 #include <condition_variable>
 #include <ros/callback_queue.h>
@@ -98,7 +100,7 @@ namespace nodelet_image_trim{
             ApriltagDetector apriltag_detector;
 
             const int imgsize[2] = {1280,720};
-            int channel = 1; // if you change it, please change image_trim.h :78
+            int channel = 3; // if you change it, please change image_trim.cpp :67 image_conved `s  type
             ImageGrabberRosUsbCam   igruc = ImageGrabberRosUsbCam(0,imgsize[0],imgsize[1],channel);
 
             cv::Mat image_ori = cv::Mat::zeros(imgsize[1],imgsize[0],CV_8UC3);
@@ -108,11 +110,15 @@ namespace nodelet_image_trim{
             std::vector<cv::Point> ltrb;
             cv::Point lefttop,rightbottom;
 
+            //計測
+            bool count_run = false;
             int count = 0;
             int count_err = 0;
+            int count_detected = 0;
 
             CsvManager csvm;
 
+            BagClockCounter bcc;
 
         public:
             virtual void onInit();
@@ -126,6 +132,7 @@ namespace nodelet_image_trim{
             void stampText(cv::Mat dst,Tracking2 track);
             cv::Mat tool(cv::Mat image_ori);
 
+            void counterCallback(const rosgraph_msgs::Clock& msg);
 
 static void ppp(){
 

@@ -16,9 +16,9 @@ class UvApriltag: public Camera{
 		UvApriltag():Camera()
         {
             ltrb = {lefttop , rightbottom};
-            tag_velK = 0.95;
-            anzenK =1.1;
-            uv_velK = 0.0;
+            tag_velK = 0.90;
+            anzenK =2.0;
+            uv_velK = 0.1;
         };
 		~UvApriltag(){};
 
