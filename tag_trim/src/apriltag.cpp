@@ -49,12 +49,22 @@ double Apriltag::getVy(){
 double Apriltag::getVz(){
 	return this->speed[2];
 }
+double Apriltag::getAx(){
+	return this->accel[0];
+}
+double Apriltag::getAy(){
+	return this->accel[1];
+}
+double Apriltag::getAz(){
+	return this->accel[2];
+}
 void Apriltag::update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq){
 	pose = ppos;
 	q = qq;
 }
 void Apriltag::reset_velocity(){
 	speed << 0 ,0 ,0;
+	pre_speed << 0 ,0 ,0;
 	vq.w() = 0;
 	vq.x() = 0;
 	vq.y() = 0;
@@ -64,11 +74,14 @@ void Apriltag::update_velocity(Eigen::Vector3d ppos,Eigen::Quaterniond qq){
 	//vx = xx-x;
 	///vy = yy-y;
 	//vz = zz-z;
+    pre_speed = speed;
 	speed = ppos - pose;
 
 	vq.w() = qq.w() - q.w();
 	vq.x() = qq.x() - q.x();
 	vq.y() = qq.y() - q.y();
 	vq.z() = qq.z() - q.z();
+
+    accel = speed - pre_speed;
 }
 

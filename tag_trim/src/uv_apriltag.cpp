@@ -2,9 +2,12 @@
 
 void UvApriltag::setPose2Uv(Apriltag *tag){
 
-		x = tag->getX() + tag_velK*tag->getVx() ;
-		y = tag->getY() + tag_velK*tag->getVy() ;
-		z = tag->getZ() + tag_velK*tag->getVz() ;
+        double tab_vec_x = tag->getVx();// + tag->getAx();
+        double tab_vec_y = tag->getVy();// + tag->getAy();
+        double tab_vec_z = tag->getVz();// + tag->getAz();
+		x = tag->getX() + tag_velK*tab_vec_x;
+		y = tag->getY() + tag_velK*tab_vec_y;
+		z = tag->getZ() + tag_velK*tab_vec_z;
 
         c_m4 << x, y, z, 1 ;
 
@@ -56,7 +59,7 @@ std::vector<cv::Point> UvApriltag::getltrb()
         lefttop.y = 0;
         rightbottom.x = img_size[0];
         rightbottom.y = img_size[1];
-        std::cerr << "error tracking.cpp" << std::endl;
+        std::cerr << "note uv_apriltag.cpp" << std::endl;
         //exit(0);
     }
     ltrb[0] = lefttop;
