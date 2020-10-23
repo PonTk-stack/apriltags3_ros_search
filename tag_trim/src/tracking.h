@@ -15,6 +15,7 @@ class Tracking2{
 	public:
 		Tracking2(){
             ltrbs.reserve(10);
+            continuous_count = 0;
         };
 		~Tracking2(){};
         void setWindowParam(ApriltagDetector &apriltag_detector,
@@ -25,6 +26,8 @@ class Tracking2{
 
 		//void setICP(const sensor_msgs::CameraInfo::ConstPtr &info){UvApriltag::setICP(info);};
         std::vector<std::vector<cv::Point>> getWindowParam(void);
+        void onMsgProcessing();
+        void noMsgProcessing();
 	//	UvApriltag uv_tag;
         UvApriltag uv_apriltag;
 
@@ -41,6 +44,7 @@ class Tracking2{
 
 
 	private:
+        int  continuous_count;
 		std::vector<std::vector<cv::Point>> ltrbs; //[[p,p],[p,p]]
 };
 #endif //TRACKING_G

@@ -26,6 +26,7 @@ class UvApriltag: public Camera{
 		void setPose2UvWithSmoothedMat(Apriltag *tag, cv::Mat &smoothedMat);
 
         std::vector<cv::Point> getltrb();
+        std::vector<cv::Point> getMaxltrb();
         //void setICP(const sensor_msgs::CameraInfo::ConstPtr &info){Camera::setICP(info);};
 
 		Eigen::Vector3d uv; // u,v,1 tag centor point
@@ -43,8 +44,10 @@ class UvApriltag: public Camera{
         void setanzenK(float gain) {anzenK = gain;}
         void setuv_velK(float gain) {uv_velK = gain;}
         void settag_velK(float gain) {tag_velK = gain;}
+
+        int getPurePixelSize();
 	private:
-    //    Apriltag tag_obj;
+        Apriltag *tag_obj;
         Eigen::Vector4d c_m4;
         double x,y,z;
         float tagsize;

@@ -28,6 +28,7 @@ inline Eigen::Vector3d q2rpy_deg(Eigen::Quaterniond q){
 
 void Tracking2::setWindowParam(ApriltagDetector &apriltag_detector,
         const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg){
+    onMsgProcessing();
     ltrbs.clear();
     for(int i=0; i<msg->detections.size(); i++){
         uv_apriltag.setPose2Uv( apriltag_detector.getApriltag( msg->detections[i].id[0] ));
@@ -36,19 +37,29 @@ void Tracking2::setWindowParam(ApriltagDetector &apriltag_detector,
 }
 void Tracking2::setWindowParam(ApriltagDetector &apriltag_detector,
         const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg, cv::Mat &smoothedMat){
+    onMsgProcessing();
     ltrbs.clear();
     for(int i=0; i<msg->detections.size(); i++){
         uv_apriltag.setPose2Uv( apriltag_detector.getApriltag( msg->detections[i].id[0] ));
         ltrbs.push_back( uv_apriltag.getltrb() );
     }
 }
-std::vector<cv::Point> Tracking2::getltrb(void)
-{
-    return uv_apriltag.getltrb();
+std::vector<cv::Point> Tracking2::getltrb(void){
+    if(continuous_count<=2){
+        return uv_apriltag.getMaxltrb();
+    }else{
+        return uv_apriltag.getltrb();
+    }
 }
 std::vector<std::vector<cv::Point>> Tracking2::getWindowParam(void)
 {
     return ltrbs;
+}
+void Tracking2::onMsgProcessing(){
+    continuous_count++;
+}
+void Tracking2::noMsgProcessing(){
+    continuous_count = 0;
 }
 
 

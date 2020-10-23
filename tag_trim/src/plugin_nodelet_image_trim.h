@@ -111,16 +111,23 @@ namespace nodelet_image_trim{
             cv::Point lefttop,rightbottom;
 
             //計測
+            int count_pure_pixel ;
             bool count_run = false;
             int count = 0;
             int count_err = 0;
             int count_detected = 0;
+            //uv_apriltag gain
+            float k_anzen ;
+            float k_tag_vel;
+            float k_uv_vel;
 
             CsvManager csvm;
 
             BagClockCounter bcc;
 
         public:
+            void measure_param_init();
+            void measure_param_update();
             virtual void onInit();
             ImageConverter();
             ~ImageConverter();

@@ -5,13 +5,26 @@ ros::Time ros_begin;
 
 namespace nodelet_image_trim{
 
+    void ImageConverter::measure_param_init(){
+        k_anzen = 1.1;
+        k_tag_vel = 0.90;
+        k_uv_vel =1.0;
+        //k_uv_vel =0.01;
+        track2.setK_safe(k_anzen);
+        track2.setK_tag_vel(k_tag_vel);
+        track2.setK_uv_vel(k_uv_vel);
+    }
+    void ImageConverter::measure_param_update(){
+        k_anzen += 0.1;
+        track2.setK_safe(k_anzen);
+    }
     ImageConverter::ImageConverter(){
         csvm.newFile();
         //csvm.lastFile();
-        csvm.csv.newRow() <<"count"<< "time" << "error rate" << "K_safe" << "K_uv_vel" << "K_tag_vel"
-            << "pixel";
+        csvm.csv.newRow() <<"count"<< "detected_count"<<"time" << "error rate" << "K_safe" << "K_uv_vel" << "K_tag_vel"
+            << "pixel" << "pure_tag_pixel";
 
-        
+        measure_param_init();
     }
     ImageConverter::~ImageConverter(){
         csvm.write();
@@ -146,15 +159,19 @@ ready_exc = true;
                 count = 0;
                 count_detected = 0;
                 count_err = 0;
+                apriltag_detector.resetApriltagVel();
             }
             //XmlRpc::XmlRpcValue params;
             //nh.getParam("/apriltags3_param", params);
             if(msg->detections.size()){
+                track2.onMsgProcessing();
                 detect_flag = true;
                 int i,t;
                 for(i=0;i<msg->detections.size();i++){
                     apriltag_detector.setApriltag(msg->detections[i]);
                     //drawpoint_flag = true;
+
+
                 }
                 track2.setWindowParam(apriltag_detector,msg);
                 ltrb = track2.getltrb();
@@ -162,12 +179,14 @@ ready_exc = true;
                 rightbottom = ltrb[1];
                 count_run = true;
                 //計測
+                count_pure_pixel = track2.uv_apriltag.getPurePixelSize();
                 if(count_run){
                     count++;
                     count_detected++;
                 }
             }
             else{
+                track2.noMsgProcessing();
                 apriltag_detector.resetApriltagVel();
                 detect_flag = false;
                 drawpoint_flag = false;
@@ -176,6 +195,7 @@ ready_exc = true;
                 rightbottom.x = igruc.getWindowWidth();//img_size[0];
                 rightbottom.y = igruc.getWindowHeight();//img_size[1];
                 //計測
+                count_pure_pixel = 0;
                 if(count_run){
                     count++;
                     count_err++;
@@ -183,22 +203,32 @@ ready_exc = true;
             }
             ros::Time ros_now = ros::Time::now();
             ros::Duration ros_duration = ros_now - ros_begin;
-#if 0
+#if 0 //loop cam data
             if(bcc.need_switch_fase() && count>0){
                 float no_detected_rate = (float)count_err / count ;
-                csvm.csv.newRow() << count << ros_duration <<  no_detected_rate << track2.getK_safe()
+                csvm.csv.newRow() << count <<  count_detected<< ros_duration <<  no_detected_rate << track2.getK_safe()
                         << track2.getK_uv_vel() << track2.getK_tag_vel()
-                        <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y) ;
+                        <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y) 
+                        << count_pure_pixel;
                 //計測パラメータ　リセット
                 count_run = false;
+                measure_param_update();
             }
 #endif
+#if 1 //not loop cam data
             if(count>0){
                 float no_detected_rate = (float)count_err / count ;
-                csvm.csv.newRow() << count << ros_duration <<  no_detected_rate << track2.getK_safe()
+                csvm.csv.newRow() << count << count_detected<< ros_duration <<  no_detected_rate << track2.getK_safe()
                         << track2.getK_uv_vel() << track2.getK_tag_vel()
-                        <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y) ;
+                        <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y)
+                        << count_pure_pixel;
+                if(bcc.need_switch_fase()){
+                    //計測パラメータ　リセット
+                    count_run = false;
+                    measure_param_update();
+                }
             }
+#endif
         }
         ready_exc = true;
     }
