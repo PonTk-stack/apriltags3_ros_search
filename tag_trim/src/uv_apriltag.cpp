@@ -1,7 +1,7 @@
 #include"uv_apriltag.h"
 
 void UvApriltag::setPose2Uv(Apriltag *tag){
-
+        tag_obj = tag;
         double tab_vec_x = tag->getVx();// + tag->getAx();
         double tab_vec_y = tag->getVy();// + tag->getAy();
         double tab_vec_z = tag->getVz();// + tag->getAz();
@@ -66,4 +66,20 @@ std::vector<cv::Point> UvApriltag::getltrb()
     ltrb[1] = rightbottom;
     return ltrb;
 }
+std::vector<cv::Point> UvApriltag::getMaxltrb(){
+    lefttop.x = 0;
+    lefttop.y = 0;
+    rightbottom.x = img_size[0];
+    rightbottom.y = img_size[1];
+    ltrb[0] = lefttop;
+    ltrb[1] = rightbottom;
+    return ltrb;
+}
+
+int UvApriltag::getPurePixelSize(){
+	int w  =  std::max({p1(0),p2(0),p3(0),p4(0)})-std::min({p1(0),p2(0),p3(0),p4(0)});
+	int h  =  std::max({p1(1),p2(1),p3(1),p4(1)})-std::min({p1(1),p2(1),p3(1),p4(1)});
+    return w*h;
+}
+
 
