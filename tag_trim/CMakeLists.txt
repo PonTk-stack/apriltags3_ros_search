@@ -60,6 +60,9 @@ add_message_files(
 #   Message2.msg
 	AprilTagDetectionArray.msg
 	AprilTagDetection.msg
+
+    ltrbArray.msg
+    ltrb.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -240,8 +243,6 @@ set(tag_trim_src
 	src/tracking.cpp
 	src/uv_apriltag.h
 	src/uv_apriltag.cpp
-	src/camera.h
-	src/camera.cpp
     src/image_grabber/image_grabber.h
     src/image_grabber/image_grabber.cpp
     src/image_grabber/image_grabber_ros_usb_cam.h
@@ -253,16 +254,26 @@ set(tag_trim_src
     src/Real-Time-Video-Stabilization/my_videostab.cpp
 
 )
-add_executable(${PROJECT_NAME}_image_trim_node
+add_library(camera 
+	src/camera.h
+	src/camera.cpp
+    )
+
+add_library(${PROJECT_NAME}_image_trim_node
 	src/image_trim_main.cpp
 	${tag_trim_src}
 )
 add_dependencies(${PROJECT_NAME}_image_trim_node  ${PROJECT_NAME}_generate_messages_cpp)
 
 target_link_libraries(${PROJECT_NAME}_image_trim_node
+    camera
 	${catkin_LIBRARIES}
 	${OpenCV_LIBRARIES}
 )#${Eigen3_LIBRARIES})
+
+add_library(share STATIC 
+    src/tracker/share.cpp
+    )
 
 set(nodelet_tag_trim_src
 	src/plugin_nodelet_image_trim.cpp
@@ -275,8 +286,6 @@ set(nodelet_tag_trim_src
 	src/tracking.cpp
 	src/uv_apriltag.h
 	src/uv_apriltag.cpp
-	src/camera.h
-	src/camera.cpp
 
     src/image_grabber/image_grabber.h
     src/image_grabber/image_grabber.cpp
@@ -293,7 +302,14 @@ set(nodelet_tag_trim_src
 
     /home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/src/bag_clock_counter.h
     /home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/src/bag_clock_counter.cpp
+
+
+    src/tracker/share.h
+    src/tracker/share.cpp
 )
+
+
+
 #add_library(${PROJECT_NAME}_plugin_nodelet_image_trim
 #	src/plugin_nodelet_image_trim_main.cpp
 #	${nodelet_tag_trim_src}
@@ -307,10 +323,13 @@ add_library(${PROJECT_NAME}_plugin_nodelet_image_trim_node
 	src/plugin_nodelet_image_trim_main.cpp
 	${nodelet_tag_trim_src}
 )
+target_include_directories(${PROJECT_NAME}_plugin_nodelet_image_trim_node PUBLIC inc ${roscpp_INCLUDE_DIRS})
 add_dependencies(${PROJECT_NAME}_plugin_nodelet_image_trim_node
 	${catkin_EXPORTED_TARGETS}
 	${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries(${PROJECT_NAME}_plugin_nodelet_image_trim_node
+    share
+    camera
 	${catkin_LIBRARIES}
 	${OpenCV_LIBRARIES}
 )#${Eigen3_LIBRARIES})
@@ -318,6 +337,51 @@ target_link_libraries(${PROJECT_NAME}_plugin_nodelet_image_trim_node
 install(TARGETS ${PROJECT_NAME}_plugin_nodelet_image_trim_node
 DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
+
+
+
+set(nodelet_tracker_src
+    src/tracker/plugin_nodelet_tracker.h
+    src/tracker/plugin_nodelet_tracker.cpp
+    /home/taisuke/File-Manager/csv_manager/csv_manager.h
+    /home/taisuke/File-Manager/csv_manager/csv_manager.cpp
+
+	src/apriltag_detector.h
+	src/apriltag_detector.cpp
+	src/apriltag.h
+	src/apriltag.cpp
+	src/tracking.h
+	src/tracking.cpp
+	src/uv_apriltag.h
+	src/uv_apriltag.cpp
+
+    src/tracker/share.h
+    src/tracker/share.cpp
+)
+
+
+add_library(${PROJECT_NAME}_plugin_nodelet_tracker_node
+	src/tracker/plugin_nodelet_tracker_main.cpp
+	${nodelet_tracker_src} )
+target_include_directories(${PROJECT_NAME}_plugin_nodelet_tracker_node PUBLIC inc ${roscpp_INCLUDE_DIRS})
+add_dependencies(${PROJECT_NAME}_plugin_nodelet_tracker_node
+	${catkin_EXPORTED_TARGETS}
+	${PROJECT_NAME}_generate_messages_cpp )
+target_link_libraries(${PROJECT_NAME}_plugin_nodelet_tracker_node
+    camera
+	${catkin_LIBRARIES}
+	${OpenCV_LIBRARIES} )#${Eigen3_LIBRARIES})
+
+
+install(TARGETS ${PROJECT_NAME}_plugin_nodelet_tracker_node
+DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+
+
+
+
+)
+
+
 
 install(DIRECTORY include/${PROJECT_NAME}/
 DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
@@ -343,3 +407,28 @@ target_link_libraries(${PROJECT_NAME}_particle_node
 	${catkin_LIBRARIES}
 	${OpenCV_LIBRARIES}
 )#${Eigen3_LIBRARIES})
+
+
+
+
+
+
+
+
+
+set(multi_src
+    src/multi.cpp
+    
+)
+
+#add_library(${PROJECT_NAME}_multi_node
+#	${multi_src} )
+add_executable(${PROJECT_NAME}_multi_node
+	${multi_src}
+)
+add_dependencies(${PROJECT_NAME}_multi_node
+	${catkin_EXPORTED_TARGETS}
+	${PROJECT_NAME}_generate_messages_cpp )
+target_link_libraries(${PROJECT_NAME}_multi_node
+	${catkin_LIBRARIES}
+	${OpenCV_LIBRARIES} )#${Eigen3_LIBRARIES})

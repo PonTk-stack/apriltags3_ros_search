@@ -7,3 +7,13 @@
 		</description>
 	</class>
 </library>
+
+<library path= "lib/libtag_trim_plugin_nodelet_tracker_node">
+	<class  name = "tag_trim/Tracker"
+					type = "nodelet_tracker::Tracker"
+					base_class_type = "nodelet::Nodelet">
+		<description>
+            Nodelet track
+		</description>
+	</class>
+</library>
