@@ -1,12 +1,10 @@
 #ifndef NODELET_IMAGE_TRIM_H
 #define NODELET_IMAGE_TRIM_H
 
-
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
 #include <eigen3/Eigen/Dense>
-
 
 #include "message_filters/subscriber.h"
 #include "message_filters/synchronizer.h"
@@ -20,7 +18,6 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <nodelet/nodelet.h>
-
 
 #include "std_msgs/String.h"
 #include "apriltag_ros/AprilTagDetectionArray.h"
@@ -50,6 +47,8 @@ std::chrono::system_clock::time_point end;
 const double PI = 3.14159265358979323846;
 typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,sensor_msgs::CameraInfo> MySyncPolicy; 
 
+#include "tracker/plugin_nodelet_tracker.h"
+#include "tracker/share.h"
 class ROSCommonNode
 {
     protected:
@@ -122,9 +121,12 @@ namespace nodelet_image_trim{
             float k_uv_vel;
 
             CsvManager csvm;
+            CsvManager csvm2 = CsvManager("/realtime.csv");
 
             BagClockCounter bcc;
 
+            //nodelet_tracker::Tracker tttt;
+            //Share *share = new Share(true);
         public:
             void measure_param_init();
             void measure_param_update();
@@ -133,12 +135,14 @@ namespace nodelet_image_trim{
             ~ImageConverter();
             void imgconvCallback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfo::ConstPtr &info);
             void TagDetectCallback(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg);
+            void TagDetectTrackerProcess(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg);
             void InfoCallback(const sensor_msgs::CameraInfo::ConstPtr &info);
             //void RectanglePoint(const apriltag_ros::AprilTagDetection &detect);
             void paste(cv::Mat dst, cv::Mat src, int x, int y);
             void stampText(cv::Mat dst,Tracking2 track);
             cv::Mat tool(cv::Mat image_ori);
 
+            void publishProcess();
             void counterCallback(const rosgraph_msgs::Clock& msg);
 
 static void ppp(){

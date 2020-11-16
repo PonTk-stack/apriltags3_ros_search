@@ -47,20 +47,30 @@
 		-->
   </group>
 
-	<arg name="manager_name" default="nodelet_manager" />
-  <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
-    <param name="num_worker_threads" value="4" />
+    <arg name="manager_name" default="nodelet_manager" />
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
+      <param name="num_worker_threads" value="1" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="tag_trim_nodelet_node"
+      args="load tag_trim/ImageConverter $(arg manager_name)"
+      output="screen">
+        <remap from="image_topic" to="/usb_cam/image_rect_color"/>
+        <remap from="camera_info_topic" to="/usb_cam/camera_info"/>
+        <remap from="tag_topic" to="/tag_detections"/>
+    </node>
+
+<!--
+  <arg name="manager_name1" default="nodelet_manager1" />
+  <node pkg="nodelet" type="nodelet" name="$(arg manager_name1)" args="manager" output="screen">
+    <param name="num_worker_threads" value="1" />
   </node>
-
-	<node pkg="nodelet" type="nodelet" name="tag_trim_nodelet_node"
-		args="load tag_trim/ImageConverter $(arg manager_name)"
-		output="screen">
-			<remap from="image_topic" to="/usb_cam/image_rect_color"/>
-			<remap from="camera_info_topic" to="/usb_cam/camera_info"/>
+	<node pkg="nodelet" type="nodelet" name="tracker_nodelet_node"
+        args="load tag_trim/Tracker $(arg manager_name1)"
+        output="screen">
 			<remap from="tag_topic" to="/tag_detections"/>
-
+			<remap from="info_topic" to="/usb_cam/camera_info"/>
 	</node>
-
+-->
 
 <!--
   <node pkg="tag_trim" type="tag_trim_plugin_nodelet_image_trim_node" name="tag_trim" output="screen" launch-prefix="">

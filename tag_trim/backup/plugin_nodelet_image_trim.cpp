@@ -111,8 +111,8 @@ void Tracking::measurePose(const apriltag_ros::AprilTagDetection &detect){
 	/*
 		 Eigen::Matrix<double,3,4> sizev3x4;
 	//sizev3x4<<size/-2, size/-2, size/2, size/2,
-	//					size/2, size/-2, size/-2, size/2,
-	//							0.0,    0.0,    0.0,    0.0;
+//				size/2, size/-2, size/-2, size/2,
+//                0.0,    0.0,    0.0,    0.0;
 
 	sizev3x4<<size/-2, size/-2, size/2, size/2,
 	size/-2, size/2, size/2, size/-2,

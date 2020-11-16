@@ -1,7 +1,9 @@
 #include"camera.h"
+#include <ros/ros.h>
 Eigen::Matrix<double,3,4> Camera::A;
 Eigen::Matrix<double,3,3> Camera::A3x3;//カメラ内部パラメータ
 Eigen::Matrix<double,3,3> Camera::K;
+Eigen::Matrix<double,3,3> demo_A;//カメラ内部パラメータ
 void Camera::setICP(const sensor_msgs::CameraInfo::ConstPtr &info){
 	camera_info = *info;
 	const double kx = camera_info.K[0];
@@ -25,9 +27,15 @@ void Camera::setICP(const sensor_msgs::CameraInfo::ConstPtr &info){
 	A << fx,  0, cx, 0,
 				0, fy, cy, 0,
 				0,  0,  1, 0;
+
 	A3x3 <<fx,  0, cx,
-										0, fy, cy,
-										0,  0,  1;
+            0, fy, cy,
+            0,  0,  1;
 	dist << k1, k2, p1, p2, k3;
+    const std::vector<double> param_list = {fx,  0, cx,
+                                            0, fy, cy,
+                                            0,  0,  1 };
+    ros::param::set("info_param/A", param_list );
+    demo_A =  A3x3;
 //f = K.inverse() * A;
 }
