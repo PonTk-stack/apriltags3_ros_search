@@ -27,7 +27,7 @@ Eigen::Quaterniond Apriltag::getQuaterniond(){
 	return this->q;
 
 }
-float Apriltag::getSize(){
+double Apriltag::getSize(){
 	return this->size;
 }
 double Apriltag::getX(){
@@ -63,12 +63,12 @@ void Apriltag::update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq){
 	q = qq;
 }
 void Apriltag::reset_velocity(){
-	speed << 0 ,0 ,0;
-	pre_speed << 0 ,0 ,0;
-	vq.w() = 0;
-	vq.x() = 0;
-	vq.y() = 0;
-	vq.z() = 0;
+	speed << 0.0 ,0.0 ,0.0;
+	pre_speed << 0.0 ,0.0 ,0.0;
+	vq.w() = 0.0;
+	vq.x() = 0.0;
+	vq.y() = 0.0;
+	vq.z() = 0.0;
 }
 void Apriltag::update_velocity(Eigen::Vector3d ppos,Eigen::Quaterniond qq){
 	//vx = xx-x;

@@ -8,13 +8,13 @@ class Apriltag{
 		Apriltag() :pose(0,0,0),speed(0,0,0),q(0,0,0,1),vq(0,0,0,1){};
 //		Apriltag(unsigned int id, const double xx, const double yy, const double zz, const Eigen::Quaterniond qq) :x(xx),y(yy),z(zz),vx(0),vy(0),vz(0),q(qq),vq(0,0,0,1){};
 		Apriltag(unsigned int iid, Eigen::Vector3d ppos,
-                const Eigen::Quaterniond qq,float ssize) :id(iid),pose(ppos),speed(0,0,0),q(qq),vq(0,0,0,1),size(ssize){};
+                const Eigen::Quaterniond qq,double ssize) :id(iid),pose(ppos),speed(0,0,0),q(qq),vq(0,0,0,1),size(ssize){};
 		~Apriltag(){};
 		void update(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq);
 		void reset(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq);
 		void reset_velocity();
 		Eigen::Quaterniond getQuaterniond();
-		float getSize();
+		double getSize();
 		double getX();
 		double getY();
 		double getZ();
@@ -26,7 +26,7 @@ class Apriltag{
 		double getAz();
 	private:
 		unsigned int id ;
-		float size; //m
+		double size; //m
 		//double x,y,z;
 		//double vx,vy,vz;
 

@@ -3,14 +3,17 @@
 #include <pluginlib/class_list_macros.h>
 #include "tracker/plugin_nodelet_tracker.h"
 ros::Time ros_begin;
+ros::Time input_time;
+ros::Time pre_input_time;
+
 
 namespace nodelet_image_trim{
 
     void ImageConverter::measure_param_init(){
-        k_anzen = 1.40;
+        k_anzen = 1.50;
         k_tag_vel = 1.00;
         //k_uv_vel =0.1;
-        k_uv_vel =0.00;
+        k_uv_vel =100.00;
         track2.setK_safe(k_anzen);
         track2.setK_tag_vel(k_tag_vel);
         track2.setK_uv_vel(k_uv_vel);
@@ -22,17 +25,23 @@ namespace nodelet_image_trim{
     ImageConverter::ImageConverter(){
         csvm.newFile();
         csvm2.newFile();
+        csvm3.newFile();
         //csvm.lastFile();
-        csvm.csv.newRow() <<"count"<< "detected_count"<<"time" << "error rate" << "K_safe" << "K_uv_vel" << "K_tag_vel"
-            << "pixel" << "pure_tag_pixel";
-        csvm2.csv.newRow() <<"count"<< "detected_count"<<"time" << "error rate" << "K_safe" << "K_uv_vel" << "K_tag_vel"
-            << "pixel" << "pure_tag_pixel";
+        csvm.csv.newRow() <<"count"<< "detected_count"<<"time"
+            <<"response"<< "error rate" << "K_safe" << "K_uv_vel"
+            << "K_tag_vel"<< "pixel" << "pure_tag_pixel";
+        csvm2.csv.newRow() <<"count"<< "detected_count"<<"time"
+            << "response"<< "error rate" << "K_safe" << "K_uv_vel"
+            << "K_tag_vel" << "pixel" << "pure_tag_pixel";
+        csvm3.csv.newRow() <<"count"<< "detected_count"<<"time"
+            << "x" << "y" << "z" <<"pure_tag_pixel";
 
         measure_param_init();
     }
     ImageConverter::~ImageConverter(){
         csvm.write();
         csvm2.write();
+        csvm3.write();
     };
 
     void ImageConverter::onInit(){
@@ -71,10 +80,11 @@ namespace nodelet_image_trim{
 
     void ImageConverter::imgconvCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfo::ConstPtr &info){
 
+
         if(ready_exc)
         {
-            start = std::chrono::system_clock::now();
-            ready_exc = false;
+            //start = std::chrono::system_clock::now();
+            //ready_exc = false;
             bool f = igruc.grabFrame(msg ,info);
             igruc.getImage(image_ori);
 
@@ -94,19 +104,20 @@ namespace nodelet_image_trim{
                 img_msg = igruc.getImageMsg(image_conved);
                 if(drawpoint_flag){
                     stampText(image_conved,track2);
+                cv::imshow("image_conved", image_conved);
+                cv::waitKey(1);
                 }
-                //cv::imshow("image_conved", image_conved);
-                //cv::waitKey(1);
             }
             else{
                 img_msg = igruc.getImageMsg(image_ori);
             }
             camera_info_ptr = igruc.getInfoMsg();
 
-            std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+            //std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
             //timer += (end - start);
             //std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(timer).count() << "ms: "<< count << " , " << count_err  << std::endl;
             publishProcess();
+
         }
     }
 
@@ -174,9 +185,12 @@ namespace nodelet_image_trim{
         //std::cout << "4: end tag_callback" << std::endl;
     }
     void ImageConverter::TagDetectTrackerProcess(const apriltag_ros::AprilTagDetectionArray::ConstPtr &msg){
+        pre_input_time = input_time;
+        input_time = ros::Time::now();
         {
 
             detect_flag = false;
+
             if(!count_run){
                 ros_begin = ros::Time::now();
                 count = 0;
@@ -193,7 +207,6 @@ namespace nodelet_image_trim{
                 int i,t;
                 for(i=0;i<msg->detections.size();i++){
                     apriltag_detector.setApriltag(msg->detections[i]);
-                    //drawpoint_flag = true;
 
 
                 }
@@ -217,7 +230,6 @@ namespace nodelet_image_trim{
                 track2.noMsgProcessing();
                 apriltag_detector.resetApriltagVel();
                 detect_flag = false;
-                drawpoint_flag = false;
                 lefttop.x = 0;
                 lefttop.y = 0;
                 rightbottom.x = igruc.getWindowWidth();//img_size[0];
@@ -231,16 +243,17 @@ namespace nodelet_image_trim{
             }
             ros::Time ros_now = ros::Time::now();
             ros::Duration ros_duration = ros_now - ros_begin;
-#if 1 //loop cam data
+            ros::Duration response = input_time - pre_input_time;
+#if 0 //loop cam data
             if(count>0){
                 float no_detected_rate = (float)count_err / count ;
-                csvm2.csv.newRow() << count << count_detected<< ros_duration <<  no_detected_rate << track2.getK_safe()
+                csvm2.csv.newRow() << count << count_detected<< ros_duration << response<<  no_detected_rate << track2.getK_safe()
                     << track2.getK_uv_vel() << track2.getK_tag_vel()
                     <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y)
                     << count_pure_pixel;
                 if(bcc.need_switch_fase()){
                     float no_detected_rate = (float)count_err / count ;
-                    csvm.csv.newRow() << count <<  count_detected<< ros_duration <<  no_detected_rate << track2.getK_safe()
+                    csvm.csv.newRow() << count <<  count_detected<< ros_duration << response<<  no_detected_rate << track2.getK_safe()
                         << track2.getK_uv_vel() << track2.getK_tag_vel()
                         <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y) 
                         << count_pure_pixel;
@@ -251,21 +264,30 @@ namespace nodelet_image_trim{
                 }
             }
 #endif
-#if 0 //not loop cam data
+#if 1 //not loop cam data
             if(count>0){
                 float no_detected_rate = (float)count_err / count ;
-                csvm.csv.newRow() << count << count_detected<< ros_duration <<  no_detected_rate << track2.getK_safe()
+                csvm2.csv.newRow() << count << count_detected<< ros_duration << response <<  no_detected_rate << track2.getK_safe()
                     << track2.getK_uv_vel() << track2.getK_tag_vel()
                     <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y)
                     << count_pure_pixel;
+
+                csvm3.csv.newRow() <<count<<count_detected<<ros_duration
+                    <<msg->detections[0].pose.pose.pose.position.x
+                    <<msg->detections[0].pose.pose.pose.position.y
+                    <<msg->detections[0].pose.pose.pose.position.z
+                    << count_pure_pixel;
+
+                /*
                 if(bcc.need_switch_fase()){
                     //計測パラメータ　リセット
                     count_run = false;
-                    measure_param_update();
                     ros::Duration(0.5).sleep();
                 }
+                */
             }
 #endif
+
         }
         ready_exc = true;
     }
