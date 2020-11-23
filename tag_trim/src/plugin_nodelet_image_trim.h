@@ -92,7 +92,7 @@ namespace nodelet_image_trim{
             bool detect_flag = false;
 
             Eigen::Matrix<int,2,1> p1,p2,p3,p4;
-            bool drawpoint_flag =false;
+            bool drawpoint_flag =true;
 
             Tracking2 track2;
 
@@ -116,12 +116,13 @@ namespace nodelet_image_trim{
             int count_err = 0;
             int count_detected = 0;
             //uv_apriltag gain
-            float k_anzen ;
-            float k_tag_vel;
-            float k_uv_vel;
+            double k_anzen ;
+            double k_tag_vel;
+            double k_uv_vel;
 
             CsvManager csvm;
             CsvManager csvm2 = CsvManager("/realtime.csv");
+            CsvManager csvm3 = CsvManager("/research.csv");
 
             BagClockCounter bcc;
 
@@ -147,7 +148,6 @@ namespace nodelet_image_trim{
 
 static void ppp(){
 
-    std::cout << "################" << std::endl;
 }
     };
 }

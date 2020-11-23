@@ -14,7 +14,7 @@ void ApriltagDetector::setApriltag(const apriltag_ros::AprilTagDetection &detect
 												detect.pose.pose.pose.orientation.x,
 												detect.pose.pose.pose.orientation.y,
 												detect.pose.pose.pose.orientation.z );
-	float size =  detect.size[0];
+	double size =  detect.size[0];
 
 	index = findID(id);
 

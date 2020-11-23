@@ -13,12 +13,15 @@
 
 class UvApriltag: public Camera{
 	public:
+        Eigen::Matrix<double,3,3> Rt0,Rt,Rt2;
 		UvApriltag():Camera()
         {
             ltrb = {lefttop , rightbottom};
             tag_velK = 0.90;
             anzenK =2.0;
-            uv_velK = 0.1;
+            uv_velK = 1.0;
+            
+            pre_vel_uv<< 0,0,0;
         };
 		~UvApriltag(){};
 
@@ -31,29 +34,42 @@ class UvApriltag: public Camera{
 
 		Eigen::Vector3d uv; // u,v,1 tag centor point
 
-		float tag_window_w; //tracking window
-		float tag_window_h;
+		double tag_basis_window_w; //basis window
+		double tag_basis_window_h; //basis window
+		double tag_window_w; //tracking window
+		double tag_window_h;
 
         cv::Point getP1(){return cv::Point(p1(0),p1(1));};
 		cv::Point getP2(){return cv::Point(p2(0),p2(1));};
 		cv::Point getP3(){return cv::Point(p3(0),p3(1));};
 		cv::Point getP4(){return cv::Point(p4(0),p4(1));};
-        float getanzenK() {return anzenK;}
-        float getuv_velK() {return uv_velK;}
-        float gettag_velK() {return tag_velK;}
-        void setanzenK(float gain) {anzenK = gain;}
-        void setuv_velK(float gain) {uv_velK = gain;}
-        void settag_velK(float gain) {tag_velK = gain;}
+        double getanzenK() {return anzenK;}
+        double getuv_velK() {return uv_velK;}
+        double gettag_velK() {return tag_velK;}
+        void setanzenK(double gain) {anzenK = gain;}
+        void setuv_velK(double gain) {uv_velK = gain;}
+        void settag_velK(double gain) {tag_velK = gain;}
 
         int getPurePixelSize();
 	private:
         Apriltag *tag_obj;
         Eigen::Vector4d c_m4;
+        Eigen::Vector4d c_m4_vel;
+
+        double tab_vec_x;
+        double tab_vec_y;
+        double tab_vec_z;
+        double tab_pre_vec_x;
+        double tab_pre_vec_y;
+        double tab_pre_vec_z;
+
         double x,y,z;
-        float tagsize;
+        double vx,vy,vz;
+        double tagsize;
 
 		Eigen::Vector3d pre_uv; // u,v,1 tag centor point
 		Eigen::Vector3d vel_uv; // u,v,1 tag centor point velocity
+		Eigen::Vector3d pre_vel_uv; // u,v,1 tag centor point velocity
 
 		Eigen::Matrix<double,3,4> sizem3x4;
 		Eigen::Matrix<double,3,4> posem3x4;
@@ -64,10 +80,12 @@ class UvApriltag: public Camera{
         std::vector<cv::Point> ltrb; //[p,p]
         cv::Point lefttop,rightbottom;
 
-        float anzenK;
-        float uv_velK;
-        float tag_velK;
+        double anzenK;
+        double uv_velK;
+        double tag_velK;
 
+        void makeltrb(int tag_basis_window_w,int tag_basis_window_h,
+                        int tag_window_w,int tag_window_h);
 };
 
 #endif//UV_APRILTAG_H
