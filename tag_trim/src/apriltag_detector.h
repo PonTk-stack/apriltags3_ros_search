@@ -30,6 +30,8 @@ class ApriltagDetector {
 		std::vector<bool> Continuitys;
 		std::vector<int>::iterator itr;
 		inline int findID(int id);
-		void updateTag(Apriltag* tag, int id, Eigen::Vector3d pose,Eigen::Quaterniond q);
+        void updateTag(Apriltag* tag, int id,
+                Eigen::Vector3d pose, Eigen::Quaterniond q,
+                Eigen::Vector3d pre_pose, Eigen::Quaterniond pre_q);
 };
 #endif //APRILTAG_AGENT_H

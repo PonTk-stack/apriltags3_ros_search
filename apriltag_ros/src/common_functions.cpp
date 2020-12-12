@@ -305,6 +305,8 @@ AprilTagDetectionArray TagDetector::detectTags (
     
     geometry_msgs::PoseWithCovarianceStamped tag_pose =
         makeTagPose(transform, rot_quaternion, image->header);
+    geometry_msgs::PoseWithCovariance my_tag_pose =
+        my_makeTagPose(transform, rot_quaternion);
 
 			//ROS_INFO_STREAM("a"<<detection->p[3][0]);//;cv::Point((int)detection->p[3][0], (int)detection->p[3][1]));
 		int pxdata[] = {(int)detection->p[3][0] , (int)detection->p[0][0] ,  (int)detection->p[1][0] , (int)detection->p[2][0]};
@@ -315,6 +317,7 @@ AprilTagDetectionArray TagDetector::detectTags (
     tag_detection.id.push_back(detection->id);
     tag_detection.size.push_back(tag_size);
 
+    tag_detection.pre_pose = pre_tag_pose;
 		for(i=0;i<4;i++){
 			tag_detection.pxdata.push_back(pxdata[i]);
 			tag_detection.pydata.push_back(pydata[i]);
@@ -325,6 +328,8 @@ AprilTagDetectionArray TagDetector::detectTags (
 
     tag_detection_array.detections.push_back(tag_detection);
     detection_names.push_back(standaloneDescription->frame_name());
+    pre_tag_pose = my_tag_pose;
+
   }
 
   //=================================================================
@@ -508,6 +513,21 @@ geometry_msgs::PoseWithCovarianceStamped TagDetector::makeTagPose(
   pose.pose.pose.orientation.y = rot_quaternion.y();
   pose.pose.pose.orientation.z = rot_quaternion.z();
   pose.pose.pose.orientation.w = rot_quaternion.w();
+  return pose;
+}
+geometry_msgs::PoseWithCovariance TagDetector::my_makeTagPose(
+    const Eigen::Matrix4d& transform,
+    const Eigen::Quaternion<double> rot_quaternion)
+{
+  geometry_msgs::PoseWithCovariance pose;
+  //===== Position and orientation
+  pose.pose.position.x    = transform(0, 3);
+  pose.pose.position.y    = transform(1, 3);
+  pose.pose.position.z    = transform(2, 3);
+  pose.pose.orientation.x = rot_quaternion.x();
+  pose.pose.orientation.y = rot_quaternion.y();
+  pose.pose.orientation.z = rot_quaternion.z();
+  pose.pose.orientation.w = rot_quaternion.w();
   return pose;
 }
 

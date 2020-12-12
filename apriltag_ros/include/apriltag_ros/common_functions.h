@@ -188,7 +188,7 @@ class TagDetector
 	//trim point p1:hidariue p2:hidarisita p3:migisita p4:migiue
 	bool detectflag = false;
 	cv::Point p1,p2,p3,p4;
-
+    geometry_msgs::PoseWithCovariance pre_tag_pose;
 
   TagDetector(ros::NodeHandle pnh);
   ~TagDetector();
@@ -212,6 +212,9 @@ class TagDetector
       const Eigen::Matrix4d& transform,
       const Eigen::Quaternion<double> rot_quaternion,
       const std_msgs::Header& header);
+  geometry_msgs::PoseWithCovariance my_makeTagPose(
+      const Eigen::Matrix4d& transform,
+      const Eigen::Quaternion<double> rot_quaternion);
 
   // Detect tags in an image
   AprilTagDetectionArray detectTags(

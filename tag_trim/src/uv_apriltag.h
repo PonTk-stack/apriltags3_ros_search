@@ -71,6 +71,8 @@ class UvApriltag: public Camera{
 		Eigen::Vector3d vel_uv; // u,v,1 tag centor point velocity
 		Eigen::Vector3d pre_vel_uv; // u,v,1 tag centor point velocity
 
+        Eigen::Quaterniond pre_q  ;
+
 		Eigen::Matrix<double,3,4> sizem3x4;
 		Eigen::Matrix<double,3,4> posem3x4;
 		Eigen::Matrix<double,3,4> pointm3x4;

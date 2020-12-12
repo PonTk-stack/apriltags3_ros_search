@@ -1,9 +1,11 @@
 #include "apriltag.h"
 
 
-void Apriltag::update(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq){
+void Apriltag::update(unsigned int iid,Eigen::Vector3d ppos,
+        Eigen::Quaterniond qq,Eigen::Vector3d pre_pos,
+        Eigen::Quaterniond pre_q){
 	if(id == iid){
-		update_velocity(ppos,qq);
+		update_velocity(ppos,qq,pre_pos,pre_q );
 		update_pose(ppos,qq);
 
 	}
@@ -14,7 +16,7 @@ void Apriltag::update(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond q
 
 }
 void Apriltag::reset(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq){
-	if(id = iid){
+	if(id == iid){
 		update_pose(ppos,qq);
 		reset_velocity();
 	}
@@ -70,17 +72,19 @@ void Apriltag::reset_velocity(){
 	vq.y() = 0.0;
 	vq.z() = 0.0;
 }
-void Apriltag::update_velocity(Eigen::Vector3d ppos,Eigen::Quaterniond qq){
+void Apriltag::update_velocity(Eigen::Vector3d ppos,
+        Eigen::Quaterniond qq,Eigen::Vector3d pre_pos,
+        Eigen::Quaterniond pre_q){
 	//vx = xx-x;
 	///vy = yy-y;
 	//vz = zz-z;
     pre_speed = speed;
-	speed = ppos - pose;
+	speed = ppos - pre_pos;
 
-	vq.w() = qq.w() - q.w();
-	vq.x() = qq.x() - q.x();
-	vq.y() = qq.y() - q.y();
-	vq.z() = qq.z() - q.z();
+	vq.w() = qq.w() - pre_q.w();
+	vq.x() = qq.x() - pre_q.x();
+	vq.y() = qq.y() - pre_q.y();
+	vq.z() = qq.z() - pre_q.z();
 
     accel = speed - pre_speed;
 }
