@@ -13,6 +13,7 @@ float64[] size
 # four corners of all member tags.
 geometry_msgs/PoseWithCovarianceStamped pose
 
+geometry_msgs/PoseWithCovariance pre_pose
 
 int32[] pxdata #xdata  0:hidariue 1:hidarisita 2:migisita 3:migiue
 int32[] pydata #ydata  0:hidariue 1:hidarisita 2:migisita 3:migiue

@@ -30,24 +30,18 @@ void UvApriltag::setPose2Uv(Apriltag *tag){
                      z,  z,  z,  z;
 
         //**********
-        Eigen::Quaterniond q_dush = tag->getQuaterniond();
-        Rt = tag->getQuaterniond().toRotationMatrix();
-
-        Rt2 = Rt + tag_velK * (Rt - Rt0);
-
-        Rt0 = Rt;
-        std::system("cls");
-        std::cout << "################################"<< std::endl;
-        std::cout << Rt2<< std::endl;
-        std::cout << "********************************"<< std::endl;
-        std::cout << 180.0/3.141592*(Rt2.matrix().eulerAngles(0,1,2))<< std::endl;
-        std::cout << "++++++++++++++++++++++++++++"<< std::endl;
-        std::cout <<tag->getX()<<","<<tag->getY() <<"," << tag->getZ()<< std::endl;
+        Eigen::Quaterniond q = tag->getQuaterniond()  ;
+        Eigen::Quaterniond next_q = q*pre_q.inverse()*q;
+        //Rt = tag->getQuaterniond().toRotationMatrix();
+        Rt = q.toRotationMatrix();
+        //Rt2 = Rt + tag_velK * (Rt - Rt0);
+        //Rt0 = Rt;
+        pre_q = q;
         //**********
         
 
 		//pointm3x4 =getA3x3() *( posem3x4 +  (tag->getQuaterniond().toRotationMatrix() * sizem3x4) ) ;
-		pointm3x4 =getA3x3() *( posem3x4 +  (Rt2.inverse() * sizem3x4) ) ;
+		pointm3x4 =getA3x3() *( posem3x4 +  (Rt.inverse() * sizem3x4) ) ;
 
 		p1 << pointm3x4(0,0) / pointm3x4(2,0),
                 pointm3x4(1,0) / pointm3x4(2,0);
@@ -67,7 +61,7 @@ void UvApriltag::setPose2Uv(Apriltag *tag){
         tab_pre_vec_x = tab_vec_x;
         tab_pre_vec_y = tab_vec_y;
 
-        tab_vec_x = 0.6*tab_vec_x + 0.4*tab_pre_vec_x;
+        //tab_vec_x = 0.6*tab_vec_x + 0.4*tab_pre_vec_x;
 
         double Bwhx = anzenK + uv_velK*abs(tab_vec_x);
         double Bwhy = anzenK + uv_velK*abs(tab_vec_y);

@@ -14,12 +14,19 @@ void ApriltagDetector::setApriltag(const apriltag_ros::AprilTagDetection &detect
 												detect.pose.pose.pose.orientation.x,
 												detect.pose.pose.pose.orientation.y,
 												detect.pose.pose.pose.orientation.z );
+	Eigen::Vector3d pre_pose(   detect.pre_pose.pose.position.x,
+                                detect.pre_pose.pose.position.y,
+                                detect.pre_pose.pose.position.z );
+	Eigen::Quaterniond pre_q(   detect.pre_pose.pose.orientation.w,
+                                detect.pre_pose.pose.orientation.x,
+                                detect.pre_pose.pose.orientation.y,
+                                detect.pre_pose.pose.orientation.z );
 	double size =  detect.size[0];
 
 	index = findID(id);
 
 	if(index >= 0){
-		updateTag(&apriltags[index], id, pose, q);
+		updateTag(&apriltags[index], id, pose, q, pre_pose,pre_q);
 	}
 	else{
 		Apriltag tag(id,pose,q,size);
@@ -35,8 +42,10 @@ void ApriltagDetector::resetApriltagVel(){
 int ApriltagDetector::savedApriltagsLength(){
 	return apriltags.size();
 }
-void ApriltagDetector::updateTag(Apriltag* tag, int id,Eigen::Vector3d pose, Eigen::Quaterniond q){
-	tag->update(id,pose,q);
+void ApriltagDetector::updateTag(Apriltag* tag, int id,
+        Eigen::Vector3d pose, Eigen::Quaterniond q,
+        Eigen::Vector3d pre_pose, Eigen::Quaterniond pre_q){
+	tag->update(id,pose,q,pre_pose,pre_q);
 }
 inline int ApriltagDetector::findID(int id){
 	itr = std::find(IDs.begin(), IDs.end(),id);

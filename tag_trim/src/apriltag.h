@@ -10,7 +10,9 @@ class Apriltag{
 		Apriltag(unsigned int iid, Eigen::Vector3d ppos,
                 const Eigen::Quaterniond qq,double ssize) :id(iid),pose(ppos),speed(0,0,0),q(qq),vq(0,0,0,1),size(ssize){};
 		~Apriltag(){};
-		void update(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq);
+        void update(unsigned int iid,Eigen::Vector3d ppos,
+        Eigen::Quaterniond qq,Eigen::Vector3d pre_pos,
+        Eigen::Quaterniond pre_q);
 		void reset(unsigned int iid,Eigen::Vector3d ppos,Eigen::Quaterniond qq);
 		void reset_velocity();
 		Eigen::Quaterniond getQuaterniond();
@@ -41,7 +43,9 @@ class Apriltag{
 
 		void update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
 	//	void update_velocity(double xx, double yy, double zz, Eigen::Quaterniond qq);
-		void update_velocity(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
+        void update_velocity(Eigen::Vector3d ppos,
+                Eigen::Quaterniond qq,Eigen::Vector3d pre_pos,
+                Eigen::Quaterniond pre_q);
 		void update_accel(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
 };
 

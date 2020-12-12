@@ -19,13 +19,13 @@ namespace nodelet_image_trim{
         track2.setK_uv_vel(k_uv_vel);
     }
     void ImageConverter::measure_param_update(){
-        k_anzen -= 0.01;
-        track2.setK_safe(k_anzen);
+       // k_anzen -= 0.01;
+       // track2.setK_safe(k_anzen);
     }
     ImageConverter::ImageConverter(){
         csvm.newFile();
         csvm2.newFile();
-        csvm3.newFile();
+        //csvm3.newFile();
         //csvm.lastFile();
         csvm.csv.newRow() <<"count"<< "detected_count"<<"time"
             <<"response"<< "error rate" << "K_safe" << "K_uv_vel"
@@ -33,15 +33,14 @@ namespace nodelet_image_trim{
         csvm2.csv.newRow() <<"count"<< "detected_count"<<"time"
             << "response"<< "error rate" << "K_safe" << "K_uv_vel"
             << "K_tag_vel" << "pixel" << "pure_tag_pixel";
-        csvm3.csv.newRow() <<"count"<< "detected_count"<<"time"
-            << "x" << "y" << "z" <<"pure_tag_pixel";
+        //csvm3.csv.newRow() <<"count"<< "detected_count"<<"time"<< "x" << "y" << "z" <<"pure_tag_pixel";
 
         measure_param_init();
     }
     ImageConverter::~ImageConverter(){
         csvm.write();
         csvm2.write();
-        csvm3.write();
+        //csvm3.write();
     };
 
     void ImageConverter::onInit(){
@@ -271,12 +270,15 @@ namespace nodelet_image_trim{
                     << track2.getK_uv_vel() << track2.getK_tag_vel()
                     <<(rightbottom.x-lefttop.x)*(rightbottom.y-lefttop.y)
                     << count_pure_pixel;
-
+                /*
+                if(msg->detections.size()){
                 csvm3.csv.newRow() <<count<<count_detected<<ros_duration
                     <<msg->detections[0].pose.pose.pose.position.x
                     <<msg->detections[0].pose.pose.pose.position.y
                     <<msg->detections[0].pose.pose.pose.position.z
                     << count_pure_pixel;
+                    }
+                */
 
                 /*
                 if(bcc.need_switch_fase()){

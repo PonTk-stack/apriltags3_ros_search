@@ -92,7 +92,7 @@ namespace nodelet_image_trim{
             bool detect_flag = false;
 
             Eigen::Matrix<int,2,1> p1,p2,p3,p4;
-            bool drawpoint_flag =true;
+            bool drawpoint_flag =false;
 
             Tracking2 track2;
 
