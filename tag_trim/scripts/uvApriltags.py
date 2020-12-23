@@ -14,6 +14,26 @@ class UvApriltag(Camera):
                                [0.0, 0.0, 0.0, 0.0] ])
 
         self.pre_uv = np.zeros((3,1))
+    def tagPose2pure_uv_size(self, apriltag):
+        pose = apriltag.pose
+        predict_pose = pose + (UvApriltag.tag_velK*apriltag.speed)
+        uv = np.dot(Camera.A,predict_pose)
+        uv /= uv[2,0]
+        ts = apriltag.size
+
+        q = apriltag.quaternion
+        R = q.rotation_matrix
+
+        posM = np.dot(Camera.A,np.dot(predict_pose,self.ones)+np.dot(np.linalg.inv(R),ts*self.sizeM))
+        p1 = np.array([[posM[0,0],posM[1,0]]]).T/posM[2,0]
+        p2 = np.array([[posM[0,1],posM[1,1]]]).T/posM[2,1]
+        p3 = np.array([[posM[0,2],posM[1,2]]]).T/posM[2,2]
+        p4 = np.array([[posM[0,3],posM[1,3]]]).T/posM[2,3]
+
+        pure_wh = self.cat_pure_wh(p1,p2,p3,p4)
+        return pure_wh 
+
+
     def tagPose2uv(self, apriltag):
         pose = apriltag.pose
         speed = apriltag.speed
@@ -39,8 +59,6 @@ class UvApriltag(Camera):
         base_wh = self.cat_base_wh(pure_wh)
 
         uv_vel = uv - self.pre_uv
-        print("*****************:")
-        print(speed[0])
         vel_wh = self.cat_vel_wh(uv_vel,pure_wh)
 
 
@@ -64,6 +82,23 @@ class UvApriltag(Camera):
         Bwh = np.array([UvApriltag.anzenK + UvApriltag.uv_velK*abs(int(uv_vel[0,0])),\
                 UvApriltag.anzenK + UvApriltag.uv_velK*abs(int(uv_vel[1,0])) ])
         return Bwh*pure_wh
+
+    def cat_pureFrame(self,uv,pure_wh):
+        uv = np.array([uv[0,0],uv[1,0]])
+        lefttop = np.squeeze(uv.T - 0.5*pure_wh)
+        rightbottom = np.squeeze(uv.T + 0.5*pure_wh)
+        if(np.any(lefttop > rightbottom)):
+            lefttop[0] = 0
+            lefttop[1] = 0
+            rightbottom[0]=Camera.image_size[0]
+            rightbottom[1]=Camera.image_size[1]
+
+            caution = '+' * 30 + '\n'
+            caution += '+{:^28}+\n'.format('Caution')
+            caution += '+' * 30 + '\n'
+            colored_warning = termcolor.colored(caution, 'yellow')
+            print(colored_warning)
+        return np.array([lefttop,rightbottom])
 
     def cat_finallyFrame(self,uv,uv_vel,basis_wh,vel_wh):
         uv = np.array([uv[0,0],uv[1,0]])

@@ -1,0 +1,5 @@
+<launch>
+
+    <node name="tag_trim_node" pkg="tag_trim" type="bagmodule.py" output="screen">
+    </node>
+</launch>

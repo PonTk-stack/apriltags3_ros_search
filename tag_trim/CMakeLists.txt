@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
 	image_transport
 	tf
 	geometry_msgs
+    rosgraph_msgs
+
 #	apriltag_ros
 	nodelet
 )
@@ -84,6 +86,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
 	geometry_msgs
+    rosgraph_msgs
 
 )
 

@@ -1,0 +1,107 @@
+#!/usr/bin/env python                                                 
+import rospy
+import cv2
+import message_filters
+from sensor_msgs.msg import Image, CameraInfo
+from cv_bridge import CvBridge, CvBridgeError
+from apriltag_ros.msg import AprilTagDetectionArray
+import numpy as np
+
+from pyquaternion import Quaternion
+#######################################################
+import sys
+sys.path.append('/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/scripts')
+from Apriltags import ApriltagsDetector
+from ImageConverter import *
+from camera import *
+#######################################################
+
+
+class LApriltags_ros(Apriltags_ros, object):
+    detected_flag = False
+    frame = np.array([[0,0],[Camera.image_size[0],Camera.image_size[1]]])
+    pure_frame_sizes = []
+    def __init__(self):
+        super(LApriltags_ros, self).__init__(callback=False)
+        
+        self.sub_tag =rospy.Subscriber('/tag_topic',AprilTagDetectionArray,self.LtagDetectedCallback)
+        self.tag_detector = ApriltagsDetector()
+        self.pure_frame_size = [0,0]
+    def LtagDetectedCallback(self,msg):
+        ids = []
+        Apriltags_ros.frames.clear()
+        if len(msg.detections)>0:
+            Apriltags_ros.detected_flag = True
+
+            for i in range(len(msg.detections)):
+                ids.append(msg.detections[i].id[0])
+                self.tag_detector.setApriltag(msg.detections[i])
+
+            self.tag_detector.reset_tag_vels(ids)
+            for i in range(len(msg.detections)):
+                self.tag_detector.all_clear_tags()
+                self.pure_frame_size=self.tag_detector.getUvPureApriltagSize(msg.detections[i])
+                Apriltags_ros.pure_frame_sizes.append(Apriltags_ros.frame_size)
+                #Apriltags_ros.frame=self.tag_detector.getUvApriltag(msg.detections[i])
+                #Apriltags_ros.frames.append(Apriltags_ros.frame)
+        else:
+            Apriltags_ros.detected_flag = False
+            self.tag_detector.reset_tag_vels(ids)
+            self.pure_frame_size = [0,0]
+            Apriltags_ros.frame_sizes.append(Apriltags_ros.pure_frame_size)
+#            Apriltags_ros.frame = np.array([ 
+#                [0,0],
+#                [Camera.image_size[0],Camera.image_size[1]]
+#                ])
+#            Apriltags_ros.frames.append(Apriltags_ros.frame)
+    def get_pure_frame_sizes(self ):
+        return Apriltags_ros.frame_sizes
+
+class LImageConverter_ros(ImageConverter,object):
+    def __init__(self):
+        super(LImageConverter_ros,self).__init__()
+    def imageConvCallback(self, img,info):
+        Camera.setICP(info)
+        try:
+            image_ori = self.bridge.imgmsg_to_cv2(img, "bgr8")
+        except CvBridgeError, e:
+            print e
+        #detect
+        if(Apriltags_ros.detected_flag):
+            #frame = [[0,0],[1280,720]]
+            frame = LApriltags_ros.frame
+            conved_img = self.imageConvert(image_ori,frame)
+            img_msg = self.image2msg(conved_img)
+            #cv2.imshow("conved_img",conved_img)
+            #cv2.waitKey(1)
+        #nondetect
+        else:
+            conved_img = image_ori  #frame = [[0,0],[1280,720]]
+            img_msg = self.image2msg(conved_img)
+        self.publishProcess(img_msg, info )
+
+
+
+class tag_trim:
+    def __init__(self):
+        self.nodename = "tag_trim_node"
+        rospy.init_node(self.nodename)
+#       sub1 = message_filters.Subscriber('/usb_cam/image_raw', Image)
+
+        icr = ImageConverter_ros()
+        apriltags_ros = Apriltags_ros()
+    def main(self):
+        rospy.spin()
+
+if __name__ == '__main__':
+    this_node = tag_trim()
+    try:
+        this_node.main()
+
+    except rospy.ROSInterruptException:
+        pass
+
+
+
+
+
