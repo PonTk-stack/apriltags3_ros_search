@@ -7,45 +7,15 @@ from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 from apriltag_ros.msg import AprilTagDetectionArray
 import numpy as np
-from Apriltags import ApriltagsDetector
+from ApriltagsDetector import ApriltagsDetector
 from ImageConverter import * 
 
 from camera import *
 
 from pyquaternion import Quaternion
 
-class Apriltags_ros():
-    detected_flag = False
-    frame = np.array([[0,0],[Camera.image_size[0],Camera.image_size[1]]])
-    frames = []
 
-    def __init__(self):
-        self.sub_tag =rospy.Subscriber('/tag_topic',AprilTagDetectionArray,self.tagDetectedCallback)
-        self.tag_detector = ApriltagsDetector()
-    def tagDetectedCallback(self,msg):
-        ids = []
-        Apriltags_ros.frames.clear()
-        if len(msg.detections)>0:
-            Apriltags_ros.detected_flag = True
-
-            for i in range(len(msg.detections)):
-                ids.append(msg.detections[i].id[0])
-                self.tag_detector.setApriltag(msg.detections[i])
-
-            self.tag_detector.reset_tag_vels(ids)
-            for i in range(len(msg.detections)):
-                self.tag_detector.all_clear_tags()
-                Apriltags_ros.frame=self.tag_detector.getUvApriltag(msg.detections[i])
-                Apriltags_ros.frames.append(Apriltags_ros.frame)
-        else:
-            Apriltags_ros.detected_flag = False
-            self.tag_detector.reset_tag_vels(ids)
-            Apriltags_ros.frame = np.array([ 
-                [0,0],
-                [Camera.image_size[0],Camera.image_size[1]]
-                ])
-            Apriltags_ros.frames.append(Apriltags_ros.frame)
-
+from Apriltags_ros import *
 class ImageConverter_ros(ImageConverter):
     def __init__(self):
         sub1 = message_filters.Subscriber("image_topic", Image)

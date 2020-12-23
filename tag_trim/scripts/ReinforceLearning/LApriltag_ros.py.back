@@ -1,0 +1,115 @@
+#!/usr/bin/env python                                                 
+import rospy
+from rosgraph_msgs.msg import Clock
+import message_filters
+from sensor_msgs.msg import Image, CameraInfo
+from cv_bridge import CvBridge, CvBridgeError
+from apriltag_ros.msg import AprilTagDetectionArray
+
+import cv2
+import numpy as np
+from pyquaternion import Quaternion
+
+from env import Environment
+from q_learning import QLearningAgent
+#######################################################
+import sys
+sys.path.append('/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/scripts')
+from ImageConverter import *
+from camera import *
+from ApriltagsDetector import *
+from Apriltags_ros import *
+#######################################################
+import sys
+sys.path.append('/home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/scripts/')
+from bag_clock_counter import BagClockCounter
+#######################################################
+
+
+
+
+
+class BagClockCounter_ros(BagClockCounter,object):
+    def __init__(self):
+        super(BagClockCounter_ros, self).__init__()
+        self.sub =rospy.Subscriber('/clock',Clock,self.counterCallback)
+
+
+class LApriltags_ros(Apriltags_ros, object):
+    detected_flag = False
+    frame = np.array([[0,0],[Camera.image_size[0],Camera.image_size[1]]])
+    pure_frame_sizes = []
+
+    def __init__(self):
+        super(LApriltags_ros, self).__init__(callback=False)
+        
+        self.sub_tag =rospy.Subscriber('/tag_topic',AprilTagDetectionArray,self.LtagDetectedCallback)
+        #self.tag_detector = ApriltagsDetector()
+        self.pure_frame_size = [0,0]
+
+        self.bcc = BagClockCounter_ros()
+        self.Learning_init()
+        self.detected   =  0
+        self.nodetected =  0
+        self.go_learn = False
+    def LtagDetectedCallback(self,msg):
+        ids = []
+        Apriltags_ros.frames.clear()
+        if len(msg.detections)>0:
+            self.go_learn = True 
+            self.Continuous_detected()
+            Apriltags_ros.detected_flag = True
+
+            for i in range(len(msg.detections)):
+                ids.append(msg.detections[i].id[0])
+                self.tag_detector.setApriltag(msg.detections[i])
+
+            self.tag_detector.reset_tag_vels(ids)
+            for i in range(len(msg.detections)):
+                self.tag_detector.all_clear_tags()
+                iid = msg.detections[i].id[0]
+                self.pure_frame_size=self.tag_detector._getUvPureApriltagSize(iid)
+                Apriltags_ros.pure_frame_sizes.append(Apriltags_ros.pure_frame_size)
+                #Apriltags_ros.frame=self.tag_detector.getUvApriltag(msg.detections[i])
+                #Apriltags_ros.frames.append(Apriltags_ros.frame)
+        else:
+            self.reset_Continuous_detected()
+            Apriltags_ros.detected_flag = False
+            self.tag_detector.reset_tag_vels(ids)
+            self.pure_frame_size = [0,0]
+            Apriltags_ros.frame_sizes.append(Apriltags_ros.pure_frame_size)
+#            Apriltags_ros.frame = np.array([ 
+#                [0,0],
+#                [Camera.image_size[0],Camera.image_size[1]]
+#                ])
+#            Apriltags_ros.frames.append(Apriltags_ros.frame)
+        self.detect_count(Apriltags_ros.detected_flag)
+        if(self.go_learn):
+            self.Learning()
+        if(self.bcc.need_switch_face()):
+            self.Learning_reset()
+            self.go_learn = False
+
+    def detect_count(self , detect_flag):
+        if(detect_flag):
+            self.detected  +=  1
+            self.nodetected =  0
+        else:
+            self.detected   =  0
+            self.nodetected += 1
+    def Learning_init(self):
+        tag_velK,anzenK,uv_velK=self.tag_detector.getGain()
+        env = Environment(anzenK,uv_velK)
+        self.QLagent = QLearningAgent(env)
+    def Learning_reset(self):
+        self.QLagent.reset_episode()
+    def Learning(self, count = 2):
+        if(self.detected >= count or self.nodetected==1):
+            return self.QLagent.learn()
+        else:
+            return 0
+
+    def get_pure_frame_sizes(self ):
+        return LApriltags_ros.frame_sizes
+
+
