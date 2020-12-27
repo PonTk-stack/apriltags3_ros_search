@@ -13,14 +13,17 @@ from sensor_msgs.msg import Image, CameraInfo
 import cv2
 import time
 
-
+import sys
+sys.path.append('/home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/scripts/')
+from bag_clock_counter_ros import BagClockCounter_ros
 
 class Ltag_trim:
     def __init__(self):
         self.nodename ="Ltag_trim_node"
         rospy.init_node(self.nodename)
 
-        lapriltags_ros = LApriltags_ros()
+        bcc = BagClockCounter_ros()
+        lapriltags_ros = LApriltags_ros(bcc)
         licr = LImageConverter_ros()
 
     def main(self):

@@ -1,9 +1,12 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt
 
+
+#%matplotlib inline
 class BAgent(object):
-    def __init__(self, epsilon=0.1):
+    def __init__(self, epsilon):
         self.epsilon = epsilon
         self.reward_log = []
         self.Q = {}
@@ -16,18 +19,19 @@ class BAgent(object):
         self.fig.save("reward_log.png")
 
 
-    def policy(self, state, actions):
-        if np.random.random < self.epsilon:
+    def policy(self, state, actions,Q):
+        if np.random.rand() < self.epsilon:
             return np.random.randint(len(actions))
         else:
-            if state in self.Q and sum(self.Q[state]) != 0:
-                return np.argmax(self.Q[state])
+            if state in Q and sum(Q[state]) != 0:
+                print("*********************")
+                return np.argmax(Q[state])
             else:
                 return np.random.randint(len(actions))
 
     def init_log(self):
         self.reward_log = []
-        self.fig = plt.figure()
+        self.fig, self.ax = plt.subplots(1,1)
         plt.title("Reward History")
         plt.xlabel("x")
         plt.ylabel("y")
@@ -35,11 +39,17 @@ class BAgent(object):
     def log(self, reward):
         self.reward_log.append(reward)
     def show_reward_log(self, interval=1, episode = -1):
-        if episode > 0 and e%interval ==0:
-            x = episode
-            y = self.reward_log[x-1]
-            plt.scatter(x, y)
-            plt.pause(0.01) #second
+        if len(self.reward_log) > 0 and episode > 1 :#and e%interval ==0:
+            x = range(len(self.reward_log))#episode
+            y = self.reward_log
+            #plt.scatter(x, y)
+            #line ,  = self.ax.plot(x,y)
+            plt.plot(x,y)
+            self.fig.canvas.draw()
+            #plt.draw()
+            #plt.show(block= False)
+            #plt.pause(0.1) #second
+            #line.remove()
 
 
     """

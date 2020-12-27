@@ -1,4 +1,5 @@
 <launch>
+  <!-- 
 	<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" >
 		<param name="video_device" value="/dev/video0" />
 		<param name="image_width" value="1280" />
@@ -10,7 +11,7 @@
 		<param name="framerate" value="60" />
 
 	</node>
-
+ -->
   <node name="image_proc" pkg="image_proc" type="image_proc" ns="usb_cam">
     <remap from="image_raw" to="/usb_cam/image_raw" />
     <remap from="camera_info" to="/usb_cam/camera_info" />

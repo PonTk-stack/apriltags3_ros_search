@@ -16,7 +16,8 @@ class Apriltags_ros():
         self.tag_detector = ApriltagsDetector()
     def tagDetectedCallback(self,msg):
         ids = []
-        Apriltags_ros.frames.clear()
+        #Apriltags_ros.frames.clear()
+        Apriltags_ros.frames =[]
         if len(msg.detections)>0:
             Apriltags_ros.detected_flag = True
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python                                                 
+#!/usr/bin/env python
 import rospy
 import sys
 import cv2
@@ -8,7 +8,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from apriltag_ros.msg import AprilTagDetectionArray
 import numpy as np
 from ApriltagsDetector import ApriltagsDetector
-from ImageConverter import * 
+from ImageConverter import *
 
 from camera import *
 
@@ -20,7 +20,7 @@ class ImageConverter_ros(ImageConverter):
     def __init__(self):
         sub1 = message_filters.Subscriber("image_topic", Image)
         sub2 = message_filters.Subscriber("camera_info_topic", CameraInfo)
-        ts = message_filters.ApproximateTimeSynchronizer([sub1,sub2], 1, 0.5)
+        ts = message_filters.ApproximateTimeSynchronizer([sub1,sub2], 10, 0.1)
         ts.registerCallback(self.imageConvCallback)
         self.image_pub = rospy.Publisher("tag_trim_node/image_trimmed", Image, queue_size=1)
         self.info_pub = rospy.Publisher("tag_trim_node/camera_info", CameraInfo, queue_size=1)

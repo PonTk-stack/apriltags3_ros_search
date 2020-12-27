@@ -9,24 +9,17 @@ class Environment():
         self.default_prob = default_prob
 
         self.agent_state = UvApriltagState(anzenK, uv_velK)
-        self.init_params = [anzenK, uv_velK]
+        #self.init_params = [anzenK, uv_velK]
+        self.init_params = self.agent_state.params
 
-    def update_for_agent_state(self,detect_flag):
-        self.agent_state.set_for_reward(detect_flag)
+    def update_for_agent_state(self,detect_flag\
+            ,pure_pixel, pixel):
+        self.agent_state.set_for_reward(detect_flag\
+                ,pure_pixel,pixel)
 
     def reset(self):
         self.agent_state = UvApriltagState(self.init_params[0], self.init_params[1])
-        state = self.get_state(self.agent_state)
-        return state
-    def get_state(self,agent_state):
-        return self.digitize_state(agent_state)
-    def digitize_state(self,agent_state):
-        anzenK, uv_velK = agent_state.get_param()
-        digitized = [np.digitize(anzenK , bins = self.bins(1.0,4.0,16)),\
-                     np.digitize(uv_velK, bins=self.bins(0.0,500.0,16))]
-        return sum([x*(16**i) for i,x in enumerate(digitized)])
-    def bins(self, clip_min, clip_max, num):
-        return np.linspace(clip_min, clip_max, num + 1)[1:-1]
+        return self.agent_state.s
     """
     def save(self,robot):
         self.frame_init_save = self.clone(frame)
@@ -41,13 +34,22 @@ class Environment():
         return[Action.anzenK_UP, Action.anzenK_DOWN,\
                 Action.uv_velK_UP, Action.uv_velK_DOWN]
     def step(self,action):
-        next_state,reward,done = self.transit(self.agent_state,action)
+        #next_state,reward,done = self.transit(self.agent_state,action)
+        next_state,reward,done = self.new_transit(self.agent_state,action)
+
         #if next_state is not None:
         #    print("next_state is None")
         #    self.agent_state = next_state
-        self.agent_state.action
-        n_state = self.digitize_state(next_state)
+        #self.agent_state.action()
+        #n_state = self.digitize_state(next_state)
+        self.agent_state =next_state
+        return next_state.s,reward,done,next_state.params
+    def new_transit(self,agent_state, action):
+        next_state = agent_state.clone
+        next_state.action(self.actions[action])
+        reward,done = self.reward_func(next_state)
         return next_state,reward,done
+
     def transit(self,agent_state,action):
         next_states, transition_probs = self.transit_func(agent_state,action)
         if len(transition_probs)  ==0:
@@ -64,7 +66,6 @@ class Environment():
     def transit_func(self,agent_state,action):
         action = self.actions[action]
         transition_probs = []
-        #transition_probs = defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[0]*len(actions))))
         next_states = []
         for i,a in enumerate(self.actions):
             prob = 0.
@@ -84,16 +85,19 @@ class Environment():
     def reward_func(self,agent_state,config=83):
         reward = self.default_reward
         done = False
-        attribute = [agent_state.get_for_reward]
+        attribute = agent_state.params_for_reward
+
         if(attribute[0]==True):
-            reward = 1
+            reward =0 #1 *(attribute[1]/attribute[2])
             done  = True
             return reward,done
-        if(attribute[0]==False):
-            reward = -1
+        elif(attribute[0]==False):
+            reward = -10
             done  =False
+            if(agent_state.anzenK<1.0 or agent_state.uv_velK <0.0):
+                reward -= 1000
             return reward,done
-        #reward -= (self.count*0.001)
-        print("aaaa", reward)
-        return reward,done
+        else:
+            #reward -= (self.count*0.001)
+            return reward,done
 
