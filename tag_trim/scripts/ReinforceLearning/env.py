@@ -1,6 +1,7 @@
 import numpy as np
 from state import *
 from collections import defaultdict
+import termcolor
 
 
 class Environment():
@@ -12,6 +13,7 @@ class Environment():
         #self.init_params = [anzenK, uv_velK]
         self.init_params = self.agent_state.params
 
+        self.pre_reward = 0
     def update_for_agent_state(self,detect_flag\
             ,pure_pixel, pixel):
         self.agent_state.set_for_reward(detect_flag\
@@ -31,7 +33,7 @@ class Environment():
     """
     @property
     def actions(self):
-        return[Action.anzenK_UP, Action.anzenK_DOWN,\
+        return[Action.anzenK_UP, Action.anzenK_DOWN, \
                 Action.uv_velK_UP, Action.uv_velK_DOWN]
     def step(self,action):
         #next_state,reward,done = self.transit(self.agent_state,action)
@@ -88,14 +90,20 @@ class Environment():
         attribute = agent_state.params_for_reward
 
         if(attribute[0]==True):
-            reward =0 #1 *(attribute[1]/attribute[2])
-            done  = True
+            reward =(attribute[1]/attribute[2])
+            self.pre_reward = reward
+            done  = False 
+            #done  = True
+            if(agent_state.anzenK<1.0 or agent_state.uv_velK <0.0):
+                reward -= 100
             return reward,done
         elif(attribute[0]==False):
-            reward = -10
-            done  =False
+            print(termcolor.colored("nondetected",'red'))
+            reward = -1
+            self.pre_reward = 0
+            done  = True
             if(agent_state.anzenK<1.0 or agent_state.uv_velK <0.0):
-                reward -= 1000
+                reward -= 100
             return reward,done
         else:
             #reward -= (self.count*0.001)

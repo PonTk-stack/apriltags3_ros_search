@@ -3,6 +3,8 @@ sys.path.append('/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/scri
 from masking import ImageConverter_ros
 from camera import Camera
 from LApriltags_ros import LApriltags_ros
+import termcolor
+
 class LImageConverter_ros(ImageConverter_ros,object):
     def __init__(self):
         super(LImageConverter_ros,self).__init__()

@@ -4,7 +4,7 @@ import termcolor
 
 class UvApriltag(Camera):
     tag_velK = 1.0
-    anzenK = 1.5
+    anzenK = 2.0
     uv_velK = 0.1
     def __init__(self):
 

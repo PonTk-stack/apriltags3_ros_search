@@ -51,7 +51,7 @@ class Apriltag():
 
     def update_velocity(self, ppos, qq, pre_pos, pre_q):
         self.pre_speed = self.speed
-        self.speed = ppos - pre_pos
+        self.speed = 0.5*((ppos - pre_pos) + self.pre_speed)
 
         self.accel = self.speed - self.pre_speed
         #print(self.quaternion.inverse)

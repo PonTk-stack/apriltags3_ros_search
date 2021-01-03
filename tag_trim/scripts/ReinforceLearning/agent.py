@@ -24,7 +24,6 @@ class BAgent(object):
             return np.random.randint(len(actions))
         else:
             if state in Q and sum(Q[state]) != 0:
-                print("*********************")
                 return np.argmax(Q[state])
             else:
                 return np.random.randint(len(actions))
