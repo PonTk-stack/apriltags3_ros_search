@@ -19,8 +19,8 @@ class UvApriltagState():
     def digitize_state(self,params):
         #anzenK, uv_velK = agent_state.get_param()
         K1, K2  = params
-        digitized = [np.digitize(K1 , bins = self.bins(1.0,4.0,16)),\
-                     np.digitize(K2, bins=self.bins(0.0,500.0,16))]
+        digitized = [np.digitize(K1 , bins = self.bins(1.0,3.0,16)),\
+                     np.digitize(K2, bins=self.bins(0.0,4.0,16))]
         return sum([x*(16**i) for i,x in enumerate(digitized)])
     def bins(self, clip_min, clip_max, num):
         return np.linspace(clip_min, clip_max, num + 1)[1:-1]
@@ -47,11 +47,12 @@ class UvApriltagState():
         self.uv_velK =uv_velK
         self.detected = detect_flag
     def action(self,action):
-        print("###############",action)
-        if(action == Action.anzenK_UP ):self.anzenK += 0.1
-        elif(action == Action.anzenK_DOWN ):self.anzenK -= 0.1
-        elif(action == Action.uv_velK_UP ):self.uv_velK += 0.01
-        elif(action == Action.uv_velK_DOWN ):self.uv_velK -= 0.01
+        if(self.anzenK < 3. and action == Action.anzenK_UP ):self.anzenK += 0.125
+        elif(self.anzenK>1. and action == Action.anzenK_DOWN ):self.anzenK -= 0.125
+        elif(self.uv_velK<4. and action == Action.uv_velK_UP ):self.uv_velK += 0.25
+        elif(self.uv_velK>0. and action == Action.uv_velK_DOWN ):self.uv_velK -= 0.25
+        """
         else:
             print("error: UvApriltagAgent")
             exit(0)
+        """

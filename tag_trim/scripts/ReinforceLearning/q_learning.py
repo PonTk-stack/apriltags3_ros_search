@@ -12,7 +12,8 @@ class QLearningAgent(BAgent, object):
         #self.imageconv_ros = ImageConverter_ros()
 ###############################################################
         self.init_learn()
-        self.episode = 0
+        self.episode = 1
+        self.action = 0
     def init_learn(self):
         self.init_log()
         self.Q = defaultdict(lambda: [0] * len(self.env.actions))
@@ -25,22 +26,30 @@ class QLearningAgent(BAgent, object):
 
         self.log(self.reward)
         #self.show_reward_log(episode = self.episode)
-    def learn(self,detect_flag,pure_pixel, pixel, gamma=0.9, learn_rate=0.3 ):
+    def learn(self,detect_flag,pure_pixel, pixel, gamma=0.9, learn_rate=0.2 ):
         self.env.update_for_agent_state(detect_flag,\
                 pure_pixel, pixel)
-        action=self.policy(\
+        n_action=self.policy(\
                 self.state,self.env.actions, self.Q )
-        n_state, reward, done, info = self.env.step(action)
+        n_state, reward, done, info = self.env.step(n_action)
         self.reward = reward
-        print("anzenK : {}, uv_velK : {} , reward : {}".format(\
-                info[0],info[1],reward))
 
-
+        """
+        if(done):
+            self.reset_episode()
         gain = reward + gamma * max(self.Q[n_state])
-        estimated = self.Q[self.state][action]
-        self.Q[self.state][action] += \
-                learn_rate*(reward+gain*estimated)
+        estimated = self.Q[self.state][self.action]
+                #learn_rate*(reward+gain*estimated)
+        """
+        self.Q[self.state][self.action] =\
+                (1-learn_rate)*self.Q[self.state][self.action] +\
+                learn_rate*(reward+gamma*self.Q[n_state][n_action])
+        print("anzenK:{},uv_velK:{},reward:{},detect:{},\n\
+                action:{},s:{},Q:{}".format(\
+            info[0],info[1],reward,detect_flag,\
+            self.action,self.state,self.Q[self.state][self.action]))
 
+        self.action = n_action
         self.state = n_state
         self.scene +=1
         return info 

@@ -6,6 +6,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 from apriltag_ros.msg import AprilTagDetectionArray
 
+import termcolor
 import cv2
 import numpy as np
 from pyquaternion import Quaternion
@@ -19,6 +20,7 @@ from camera import *
 from ApriltagsDetector import *
 from Apriltags_ros import *
 from recoder import Recoder
+from time_checker import TCR
 recoder = Recoder()
 #######################################################
 import sys
@@ -33,6 +35,7 @@ from q_learning import QLearningAgent
 
 
 class LApriltags_ros(Apriltags_ros, object):
+    contact_img_converter = True
     detected_flag = False
     frame = np.array([[0,0],[Camera.image_size[0],Camera.image_size[1]]])
     pure_frame_sizes = []
@@ -42,14 +45,14 @@ class LApriltags_ros(Apriltags_ros, object):
         self.sub_tag =rospy.Subscriber('/tag_topic',AprilTagDetectionArray,self.LtagDetectedCallback)
         #self.tag_detector = ApriltagsDetector()
         self.bcc = bcc
-        self.pure_frame_size = np.array([0,0])
 
         self.Learning_init()
         self.detected   =  0
         self.nodetected =  0
         self.go_learn = False
 
-        self.begin =self.now = self.pre_time= time.time()
+        self.setup_time = self.begin =self.now = self.pre_time= time.time()
+        self.TCR = TCR()
 
         self.pre_detected_flag = False
         self.pre_pure_pixel =0
@@ -58,11 +61,28 @@ class LApriltags_ros(Apriltags_ros, object):
     def __del__(self):
         recoder.to_csv()
     def LtagDetectedCallback(self,msg):
+        self.TCR.begin()
+        if(self.bcc.need_switch_fase()):
+            print(termcolor.colored("switch",'red'))
+            self.TCR.reset()
+
+            self.lean_count += 1
+            if(self.lean_count %3==0):
+                recoder.to_csv()
+                self.Learning_reset()
+            self.go_learn = False
+            #LApriltags_ros.detected_flag = False
+            recoder.to_csv()
+            recoder.reset()
+            self.begin = time.time()
+
         ids = []
         #LApriltags_ros.pure_frame_sizes.clear()
         LApriltags_ros.pure_frame_sizes = []
         if len(msg.detections)>0:
-            self.go_learn = True
+            if(self.TCR.between() >=1.0 ):
+                print(termcolor.colored(self.TCR.between(),'magenta'))
+                self.go_learn = True
             LApriltags_ros.detected_flag = True
 
             for i in range(len(msg.detections)):
@@ -72,37 +92,28 @@ class LApriltags_ros(Apriltags_ros, object):
             self.tag_detector.reset_tag_vels(ids)
             for i in range(len(msg.detections)):
                 iid = msg.detections[i].id[0]
-                self.pure_frame_size=self.tag_detector._getUvPureApriltagSize(iid)
+                pure_frame_size=self.tag_detector._getUvPureApriltagSize(iid)
                 LApriltags_ros.frame=self.tag_detector.getUvApriltag(msg.detections[i])
                 #LApriltags_ros.pure_frame_sizes.append(self.pure_frame_size)
                 #LApriltags_ros.frames.append(Apriltags_ros.frame)
+            print(termcolor.colored("detect",'blue'))
         else:
+
             self.tag_detector.all_clear_tags()
             LApriltags_ros.detected_flag = False
             self.tag_detector.reset_tag_vels(ids)
-            self.pure_frame_size = np.array([0,0])
-            LApriltags_ros.frame = np.array([ 
+            pure_frame_size = np.array([0,0])
+            LApriltags_ros.frame = np.array([
                 [0,0],
                 [Camera.image_size[0],Camera.image_size[1]]
                 ])
             #LApriltags_ros.pure_frame_sizes.append(self.pure_frame_size)
 #            LApriltags_ros.frames.append(Apriltags_ros.frame)
-        self.detect_count(LApriltags_ros.detected_flag)
+            print(termcolor.colored("nondetect",'yellow'))
+        self.detect_count(LApriltags_ros.detected_flag,self.TCR.response())
         if(self.go_learn):
-            w,h =  self.pure_frame_size
-            pure_pixel = w*h
-            lefttop,rightbottom = LApriltags_ros.frame
-            w = rightbottom[0] - lefttop[0]
-            h = rightbottom[1] - lefttop[1]
-            pixel = w*h
-            k2, k3 = self.Learning(self.pre_detected_flag\
-                    ,self.pre_pure_pixel,self.pre_pixel)
-            os.system('clear')
-            #print("anzenK : {}, uv_velK : {} , reward : {}".format(k2, k3, self.QLagent.reward))
-            if not(k2 == k3 ==0):
-                self.tag_detector.setGain(anzenK=k2,uv_velK=k3 )
+            self.setGainWithLearning(pure_frame_size,LApriltags_ros.frame)
 ##########################measure############################
-        self.now = time.time()
         tag_velK,anzenK,uv_velK=self.tag_detector.getGain()
         recoder.tag_velK = tag_velK
         recoder.anzenK = anzenK
@@ -114,7 +125,7 @@ class LApriltags_ros(Apriltags_ros, object):
         recoder.pixel_w = w
         recoder.pixel_h = h
         self.pre_pixel=w*h
-        w,h =  self.pure_frame_size
+        w,h =  pure_frame_size
         recoder.pure_pixel = w*h
         recoder.pure_pixel_w = w
         recoder.pure_pixel_h = h
@@ -122,26 +133,16 @@ class LApriltags_ros(Apriltags_ros, object):
         recoder.episode = self.QLagent.episode
         recoder.reward = self.QLagent.reward
 
-
         recoder.recode()
         recoder.save()
-############################################################
-        if(self.bcc.need_switch_fase()):
-            self.lean_count=+1
-            if(self.lean_count %3==0):
-                self.Learning_reset()
-            self.go_learn = False
-            LApriltags_ros.detected_flag = False
-            recoder.to_csv()
-            recoder.reset()
-            self.begin = time.time()
 
-        self.pre_time = time.time()
+############################################################
+
+        self.TCR.end()
         self.pre_detected_flag  = LApriltags_ros.detected_flag
-    def detect_count(self , detect_flag):
+    def detect_count(self , detect_flag, response):
         recoder.count += 1
-        recoder.time = self.now - self.begin
-        recoder.response = self.now - self.pre_time
+        recoder.response = response
         if(detect_flag):
             recoder.detect_count += 1
             self.detected  +=  1
@@ -149,6 +150,19 @@ class LApriltags_ros(Apriltags_ros, object):
         else:
             self.detected   =  0
             self.nodetected += 1
+
+    def setGainWithLearning(self,pure_frame_size,frame):
+            pure_pixel = pure_frame_size[0]*pure_frame_size[1] #w,h =  pure_frame_size
+            #lefttop,rightbottom = frame
+            pixel =\
+                    (frame[1][0] - frame[0][0])\
+                    *(frame[1][1] - frame[0][1])#(rightbottom[0]-lefttop[0])*(rightbottom[1]-lefttop[1])
+            k2, k3 = self.Learning(LApriltags_ros.detected_flag\
+                    ,pure_pixel,pixel)
+#            print("anzenK : {}, uv_velK : {} , reward : {}".format(k2, k3, self.QLagent.reward))
+            if not(k2 == k3 ==0):
+                self.tag_detector.setGain(anzenK=k2,uv_velK=k3 )
+
     def Learning_init(self):
         tag_velK,anzenK,uv_velK=self.tag_detector.getGain()
         env = Environment(anzenK,uv_velK)
@@ -157,8 +171,8 @@ class LApriltags_ros(Apriltags_ros, object):
         self.QLagent.reset_episode()
     def Learning(self,detect_flag, pure_pixel, pixel, count = 2):
         if(self.detected >= count or self.nodetected==1):
-            return self.QLagent.learn(detect_flag,\
-                    pure_pixel,pixel) #anzenk, uv_velk
+            return self.QLagent.learn(detect_flag\
+                    , pure_pixel, pixel) #anzenk, uv_velk
         else:
             return [0,0]
 
