@@ -2,8 +2,11 @@ import numpy as np
 from camera import *
 import termcolor
 
+import sys
+sys.path.append('/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/kaiseki/')
+from kalman_filter import InstantKalmanFilter
 class UvApriltag(Camera):
-    tag_velK = 1.0
+    tag_velK = 2.0
     anzenK = 2.0
     uv_velK = 0.1
     def __init__(self):
@@ -14,6 +17,9 @@ class UvApriltag(Camera):
                                [0.0, 0.0, 0.0, 0.0] ])
 
         self.pre_uv = np.zeros((3,1))
+
+        kf0 = InstantKalmanFilter()
+
     def tagPose2pure_uv_size(self, apriltag):
         pose = apriltag.pose
         predict_pose = pose + (UvApriltag.tag_velK*apriltag.speed)
@@ -31,7 +37,7 @@ class UvApriltag(Camera):
         p4 = np.array([[posM[0,3],posM[1,3]]]).T/posM[2,3]
 
         pure_wh = self.cat_pure_wh(p1,p2,p3,p4)
-        return pure_wh 
+        return pure_wh
 
 
     def tagPose2uv(self, apriltag):

@@ -19,9 +19,11 @@ from ImageConverter import *
 from camera import *
 from ApriltagsDetector import *
 from Apriltags_ros import *
-from recoder import Recoder
 from time_checker import TCR
+from recoder import Recoder
 recoder = Recoder()
+from recoder_mini import Recoder2
+recoder2 = Recoder2()
 #######################################################
 import sys
 #sys.path.append('/home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/scripts/')
@@ -74,6 +76,8 @@ class LApriltags_ros(Apriltags_ros, object):
             #LApriltags_ros.detected_flag = False
             recoder.to_csv()
             recoder.reset()
+            recoder2.to_csv()
+            recoder2.reset()
             self.begin = time.time()
 
         ids = []
@@ -82,7 +86,7 @@ class LApriltags_ros(Apriltags_ros, object):
         if len(msg.detections)>0:
             if(self.TCR.between() >=1.0 ):
                 print(termcolor.colored(self.TCR.between(),'magenta'))
-                self.go_learn = True
+#                self.go_learn = True
             LApriltags_ros.detected_flag = True
 
             for i in range(len(msg.detections)):
@@ -114,6 +118,7 @@ class LApriltags_ros(Apriltags_ros, object):
         if(self.go_learn):
             self.setGainWithLearning(pure_frame_size,LApriltags_ros.frame)
 ##########################measure############################
+        recoder.time = self.TCR.now()
         tag_velK,anzenK,uv_velK=self.tag_detector.getGain()
         recoder.tag_velK = tag_velK
         recoder.anzenK = anzenK
@@ -135,7 +140,28 @@ class LApriltags_ros(Apriltags_ros, object):
 
         recoder.recode()
         recoder.save()
+##########################measure2############################
+        recoder2.time = self.TCR.now()
+        w = rightbottom[0] - lefttop[0]
+        h = rightbottom[1] - lefttop[1]
+        recoder2.pixel_w = w
+        recoder2.pixel_h = h
+        w,h =  pure_frame_size
+        recoder2.pure_pixel_w = w
+        recoder2.pure_pixel_h = h
+        self.pre_pure_pixel =w*h
+        try:
+            recoder2.pos_x = self.tag_detector.getApriltag(0).pose[0][0]
+        except:
+            recoder2.pos_x = 0
 
+        try:
+            recoder2.speed_x = self.tag_detector.getApriltag(0).speed[0][0]
+        except:
+            recoder2.speed_x = 0
+
+        recoder2.recode()
+        recoder2.save()
 ############################################################
 
         self.TCR.end()
@@ -143,8 +169,11 @@ class LApriltags_ros(Apriltags_ros, object):
     def detect_count(self , detect_flag, response):
         recoder.count += 1
         recoder.response = response
+        recoder2.count += 1
+        recoder2.response = response
         if(detect_flag):
             recoder.detect_count += 1
+            recoder2.detect_count += 1
             self.detected  +=  1
             self.nodetected =  0
         else:
