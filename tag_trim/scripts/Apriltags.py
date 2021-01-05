@@ -19,6 +19,7 @@ class Apriltag():
         self.d_quaternion = Quaternion(0.,0.,0.,0.) #(w,x,y,z)
 
         self.pre_speed = np.zeros((3,1))
+
     def set(self, iid, ppos, qq, pre_pos, pre_q, size):
         self.id = iid
         self.size =size
@@ -51,7 +52,9 @@ class Apriltag():
 
     def update_velocity(self, ppos, qq, pre_pos, pre_q):
         self.pre_speed = self.speed
-        self.speed = 0.5*((ppos - pre_pos) + self.pre_speed)
+        self.speed = ppos - pre_pos
+        #self.speed = 0.5*((ppos - pre_pos) + self.pre_speed)
+        print("speed : ", (ppos - pre_pos))
 
         self.accel = self.speed - self.pre_speed
         #print(self.quaternion.inverse)
