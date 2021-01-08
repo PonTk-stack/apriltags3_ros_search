@@ -4,13 +4,14 @@ import numpy as np
 import sys
 from pyquaternion import Quaternion
 from uvApriltags import *
-from Apriltags import *
+#from Apriltags import *
+from ApriltagsKalman import *
 
 class ApriltagsDetector():
     def __init__(self):
         self.tag_list = []
         self.uv_tag_list = []
-        self.tag_obj = Apriltag()
+        #self.tag_obj = Apriltag()
         self.uv_tag_obj = UvApriltag()
 
     def setGain(self,tag_velK=1.0,anzenK=1.5,uv_velK=0.1):
@@ -45,7 +46,8 @@ class ApriltagsDetector():
         if(index >= 0):
             self.updateApriltag(self.tag_list[index],iid,pose,q,pre_pose,pre_q)
         else:
-            tag = Apriltag()
+            #tag = Apriltag()
+            tag = ApriltagsKalman()
             tag.set(iid,pose,q,pre_pose,pre_q, size)
             self.tag_list.append(tag)
 

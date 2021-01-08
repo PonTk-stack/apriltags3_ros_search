@@ -2,15 +2,11 @@ import numpy as np
 from camera import *
 import termcolor
 
-import sys
-sys.path.append('/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/kaiseki/')
-from kalman_filter import InstantKalmanFilter
 class UvApriltag(Camera):
     tag_velK = 2.0
     anzenK = 2.0
-    uv_velK = 0.1
+    uv_velK = 0.5
     def __init__(self):
-
         self.ones = np.array([[1.0,1.0,1.0,1.0]])
         self.sizeM = np.array([[0.5,-0.5,-0.5, 0.5],\
                                [0.5, 0.5,-0.5,-0.5],\
@@ -18,10 +14,9 @@ class UvApriltag(Camera):
 
         self.pre_uv = np.zeros((3,1))
 
-        kf0 = InstantKalmanFilter()
-
     def tagPose2pure_uv_size(self, apriltag):
         pose = apriltag.pose
+
         predict_pose = pose + (UvApriltag.tag_velK*apriltag.speed)
         uv = np.dot(Camera.A,predict_pose)
         uv /= uv[2,0]
@@ -103,7 +98,7 @@ class UvApriltag(Camera):
             caution += '+{:^28}+\n'.format('Caution')
             caution += '+' * 30 + '\n'
             colored_warning = termcolor.colored(caution, 'yellow')
-            print(colored_warning)
+            print(colored_warning)#warning
         return np.array([lefttop,rightbottom])
 
     def cat_finallyFrame(self,uv,uv_vel,basis_wh,vel_wh):
@@ -143,13 +138,6 @@ class UvApriltag(Camera):
             caution += '+{:^28}+\n'.format('Caution')
             caution += '+' * 30 + '\n'
             colored_warning = termcolor.colored(caution, 'yellow')
-            print(colored_warning)
+            print(colored_warning)#warning
 
         return np.array([lefttop,rightbottom])
-
-
-
-
-        
-
-
