@@ -6,11 +6,11 @@ import numpy as np
 import sys
 from pyquaternion import Quaternion
 
-class Apriltag():
+class Apriltag(object):
     def __init__(self):
 
-        self.id=-1;
-        self.size = 0.;
+        self.id=-1
+        self.size = 0.
         self.pose = np.zeros((3,1))
         self.speed = np.zeros((3,1))
         self.accel = np.zeros((3,1))
@@ -30,9 +30,14 @@ class Apriltag():
             self.update_velocity(ppos,qq, pre_pos, pre_q)
             self.update_pose(ppos,qq)
         else:
-            raise ValueError("id is not not miss-match")
+            raise valueerror("id is not not miss-match")
             sys.exit()
+    def reset_velocity(self):
+        self.speed = np.zeros((3,1))
+        self.accel = np.zeros((3,1))
+        self.d_quaternion = Quaternion(0.,0.,0.,1.) #(w,x,y,z)
 
+    """
     def reset(self, iid, ppos, qq):
         if(self.id == iid):
             self.update_pose(ppos, qq)
@@ -40,21 +45,17 @@ class Apriltag():
         else:
             raise ValueError("id is not not miss-match")
             sys.exit()
+    """
 
     def update_pose(self, ppos, qq):
         self.pose = ppos
         self.quaternion = qq
 
-    def reset_velocity(self):
-        self.speed = np.zeros((3,1))
-        self.accel = np.zeros((3,1))
-        self.d_quaternion = Quaternion(0.,0.,0.,1.) #(w,x,y,z)
 
     def update_velocity(self, ppos, qq, pre_pos, pre_q):
         self.pre_speed = self.speed
         self.speed = ppos - pre_pos
         #self.speed = 0.5*((ppos - pre_pos) + self.pre_speed)
-        print("speed : ", (ppos - pre_pos))
 
         self.accel = self.speed - self.pre_speed
         #print(self.quaternion.inverse)
