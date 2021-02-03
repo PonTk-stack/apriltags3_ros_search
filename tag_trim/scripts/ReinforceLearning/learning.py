@@ -17,14 +17,15 @@ import sys
 sys.path.append('/home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/scripts/')
 from bag_clock_counter_ros import BagClockCounter_ros
 
-class Ltag_trim:
+
+class Ltag_trim():
     def __init__(self):
         self.nodename ="Ltag_trim_node"
         rospy.init_node(self.nodename)
 
-        bcc = BagClockCounter_ros()
-        lapriltags_ros = LApriltags_ros(bcc)
-        licr = LImageConverter_ros()
+        self.bcc = BagClockCounter_ros()
+        self.lapriltags_ros = LApriltags_ros(self.bcc)
+        self.licr = LImageConverter_ros()
 
     def main(self):
         rospy.spin()
@@ -36,7 +37,8 @@ if __name__ == "__main__":
         #sim.load()
         #ipr = ImagePubliser()
         #ipr.load()
-        this_node.main()
+        rospy.spin()
+        #this_node.main()
     except rospy.ROSInterruptException:
         pass
 

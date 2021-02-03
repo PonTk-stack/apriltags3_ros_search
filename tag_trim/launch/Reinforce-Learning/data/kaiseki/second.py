@@ -90,12 +90,14 @@ def main():
     """"""""""""""""""
     plt.subplot(3,2,3)
     plt.plot(t,speed)
+    plt.ylim(0.,0.03)
     plt.title("speed_x")
     plt.xlabel("time")
     plt.ylabel("m")
     """"""""""""""""""
     plt.subplot(3,2,4)
     plt.plot(estimated_t,estimated_speed)
+    plt.ylim(0.,0.03)
     plt.title("estimated speed_x")
     plt.xlabel("time")
     plt.ylabel("m")

@@ -41,7 +41,7 @@ class KalmanFilter():
             0
             ]) # 位置のみを線形写像する観測モデル
         #Q = (sigma_a**2) * G * G.T # cov(Gw_k) = (sigma_a)^2 * (G)(G^T): 共分散
-        self.Q = 0.01
+        self.Q = 0.0001
         #R = sigma_z**2 # R = E(v_k*(v_k)^t) = (sigma_z)^2: ?
         self.R = 0.5
 

@@ -8,11 +8,10 @@ import termcolor
 class LImageConverter_ros(ImageConverter_ros,object):
     def __init__(self):
         super(LImageConverter_ros,self).__init__()
-        
     def imageConvCallback(self, img,info):
         Camera.setICP(info)
         try:
-            image_ori = self.bridge.imgmsg_to_cv2(img, "bgr8")
+            image_ori = self.bridge.imgmsg_to_cv2(img,self.encode )
         except CvBridgeError, e:
             print e
         #detect
