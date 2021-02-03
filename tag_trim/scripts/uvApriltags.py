@@ -3,9 +3,9 @@ from camera import *
 import termcolor
 
 class UvApriltag(Camera):
-    tag_velK = 2.0
+    tag_velK = 1.0
     anzenK = 2.0
-    uv_velK = 0.5
+    uv_velK = 0.0
     def __init__(self):
         self.ones = np.array([[1.0,1.0,1.0,1.0]])
         self.sizeM = np.array([[0.5,-0.5,-0.5, 0.5],\

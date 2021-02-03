@@ -39,7 +39,9 @@ class Apriltag{
 		Eigen::Quaterniond q;//Quartation (w, x, y, z)
 		Eigen::Quaterniond vq;//Quartation (w, x, y, z)
 
+		Eigen::Vector3d obj_speed; // (x y z)
 		Eigen::Vector3d pre_speed; // (x y z)
+		Eigen::Vector3d prepre_speed; // (x y z)
 
 		void update_pose(Eigen::Vector3d ppos, Eigen::Quaterniond qq);
 	//	void update_velocity(double xx, double yy, double zz, Eigen::Quaterniond qq);

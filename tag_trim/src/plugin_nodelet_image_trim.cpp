@@ -10,10 +10,10 @@ ros::Time pre_input_time;
 namespace nodelet_image_trim{
 
     void ImageConverter::measure_param_init(){
-        k_anzen = 1.50;
+        k_anzen = 2.00;
         k_tag_vel = 1.00;
         //k_uv_vel =0.1;
-        k_uv_vel =100.00;
+        k_uv_vel =0.00;
         track2.setK_safe(k_anzen);
         track2.setK_tag_vel(k_tag_vel);
         track2.setK_uv_vel(k_uv_vel);

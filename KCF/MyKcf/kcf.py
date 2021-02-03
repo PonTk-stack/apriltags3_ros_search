@@ -59,8 +59,16 @@ class Tracker():
         x = int(cx - w // 2)
         y = int(cy - h // 2)
 
+        print("**********")
+        print(x,"**",y,"**",w,"**",h)
+        print(image.shape)
+        if(x+w >= image.shape[1]-1):  x = image.shape[1]-1
+        if(y+w >= image.shape[0]-1):  y =  image.shape[0]-1
+        if(x <= 0): x = 1
+        if(y <= 0): y = 1
+        print(x,"**",y,"**",x+w,"**",y+h)
         sub_image = image[y:y+h, x:x+w, :]
-        print(sub_image.shape)
+        print(sub_image.size)
         resized_image = cv2.resize(sub_image, (self.pw, self.ph))
 
         if self.gray_feature:
@@ -131,6 +139,7 @@ class Tracker():
         max_response = -1
         for scale in [0.95, 1.0, 1.05]:
             roi = map(int, (cx, cy, w * scale, h * scale))
+            print("####:",roi)
             z = self.get_feature(image, roi)
             responses = self.detect(self.alphaf, self.x, z, self.sigma)
             height, width = responses.shape
@@ -146,10 +155,7 @@ class Tracker():
                 best_w = int(w * scale)
                 best_h = int(h * scale)
                 best_z = z
-        if(int(best_h) <2):
-            self.roi = self.roi
-        else:
-            self.roi = (cx + dx, cy + dy, best_w, best_h)
+        self.roi = (cx + dx, cy + dy, best_w, best_h)
         #update template
         self.x = self.x * (1 - self.update_rate) + best_z * self.update_rate
         y = self.gaussian_peak(best_z.shape[2], best_z.shape[1])
@@ -157,4 +163,14 @@ class Tracker():
         self.alphaf = self.alphaf * (1 - self.update_rate) + new_alphaf * self.update_rate
 
         cx, cy, w, h = self.roi
+
+        x1 = cx-w//2
+        y1 = cy-h//2
+        x2 = cx+w//2
+        y2 = cy+h//2
+        print( image.shape[1]-1)
+        if(x2 >= image.shape[1]-1):  cx = image.shape[1]-w//2 
+        if(y2 >= image.shape[0]-1):  cy =  image.shape[0]-h//2 
+        if(x1 <= 0): cx = w//2 
+        if(y1 <= 0): cy = h//2 
         return (cx - w // 2, cy - h // 2, w, h)

@@ -41,7 +41,7 @@ class KalmanFilter():
             0
             ]) # 位置のみを線形写像する観測モデル
         #Q = (sigma_a**2) * G * G.T # cov(Gw_k) = (sigma_a)^2 * (G)(G^T): 共分散
-        self.Q = 0.01
+        self.Q = 0.0001
         #R = sigma_z**2 # R = E(v_k*(v_k)^t) = (sigma_z)^2: ?
         self.R = 0.5
 
@@ -53,8 +53,8 @@ class KalmanFilter():
                 [0]
                 ]) # 位置と速度: [位置, 加速度]
             self.prepare(x)
-        x_n = self.measurement_update(z)
-        self.time_update(x_n)
+        x_n=self.time_update()
+        self.measurement_update(z)
         self.count += 1
         return x_n
     def reset(self):
@@ -68,22 +68,24 @@ class KalmanFilter():
     def prepare(self,new_x):
         if( new_x.shape == self.x.shape ):
             self.x = new_x
+            return new_x
         else:
             print(sys.stderr,new_x)
             exit(1)
 
     def observe(self,z_k):
         return z_k
-    def time_update(self,x_n):
+    def time_update(self):
         """
         一歩先の状態を予測する
         """
-        self.x = (self.F * x_n) #+ (self.G * w) # Fx_{k-1} + Gw_k: 現時刻における予測推定値
+        self.x = (self.F * self.x) #+ (self.G * w) # Fx_{k-1} + Gw_k: 現時刻における予測推定値
         """
         誤差共分散の計算を一歩進める
         """
-        self.P = self.F * self.P_n * self.F.T + self.Q # F * P_{k-1} * F^T + G_k * Q_k * (G_k)^T: 現時刻における予測誤差行列
+        self.P = self.F * self.P * self.F.T + self.Q # F * P_{k-1} * F^T + G_k * Q_k * (G_k)^T: 現時刻における予測誤差行列
 
+        return self.x # estimated
     def measurement_update(self,z):
         """
         kalmanゲインの計算
@@ -94,14 +96,13 @@ class KalmanFilter():
         観測値Zをもとに推定値の更新
         """
         e = z - self.H * self.x # z_k - H * x_k: 観測残差
-        x_n = self.x + K * e # x_k + K_k * e_k: 位置の補正
+        self.x = self.x + K * e # x_k + K_k * e_k: 位置の補正
         #estimate_position.append(x_k_k.tolist()[0][0])
         """
         誤差の共分散の更新
         """
-        self.P_n = (self.I - K * self.H) * self.P # (I - K_k * H) * p_k_k: 更新された誤差の共分散
+        self.P = (self.I - K * self.H) * self.P # (I - K_k * H) * p_k_k: 更新された誤差の共分散
         """"""
-        return x_n # estimated
 
 class InstantKalmanFilter():
     def __init__(self):

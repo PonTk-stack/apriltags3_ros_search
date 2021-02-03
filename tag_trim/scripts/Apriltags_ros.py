@@ -14,11 +14,17 @@ class Apriltags_ros():
         if(callback):
             self.sub_tag =rospy.Subscriber('/tag_topic',AprilTagDetectionArray,self.tagDetectedCallback)
         self.tag_detector = ApriltagsDetector()
+
+        self.count = 0
+    def __del__(self):
+        print("owari")
     def tagDetectedCallback(self,msg):
         ids = []
         #Apriltags_ros.frames.clear()
         Apriltags_ros.frames =[]
         if len(msg.detections)>0:
+            self.count +=1
+            print(self.count)
             Apriltags_ros.detected_flag = True
 
             for i in range(len(msg.detections)):

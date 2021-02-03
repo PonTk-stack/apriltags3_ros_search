@@ -63,8 +63,8 @@ void UvApriltag::setPose2Uv(Apriltag *tag){
 
         //tab_vec_x = 0.6*tab_vec_x + 0.4*tab_pre_vec_x;
 
-        double Bwhx = anzenK + uv_velK*abs(tab_vec_x);
-        double Bwhy = anzenK + uv_velK*abs(tab_vec_y);
+        double Bwhx = anzenK + uv_velK*fabs(tab_vec_x);
+        double Bwhy = anzenK + uv_velK*fabs(tab_vec_y);
 		tag_window_w  = Bwhx * width;
 		tag_window_h  = Bwhy * height;
 

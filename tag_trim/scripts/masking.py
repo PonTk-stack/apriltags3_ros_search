@@ -26,12 +26,14 @@ class ImageConverter_ros(ImageConverter):
         self.info_pub = rospy.Publisher("tag_trim_node/camera_info", CameraInfo, queue_size=1)
 
         self.bridge=CvBridge()
+        #self.encode = "bgr8"
+        self.encode = "mono8"
     def __del__(self):
         cv2.destroyAllWindows()
     def imageConvCallback(self, img,info):
         Camera.setICP(info)
         try:
-            image_ori = self.bridge.imgmsg_to_cv2(img, "bgr8")
+            image_ori = self.bridge.imgmsg_to_cv2(img, self.encode)
         except CvBridgeError, e:
             print e
         #detect
@@ -48,7 +50,7 @@ class ImageConverter_ros(ImageConverter):
             img_msg = self.image2msg(conved_img)
         self.publishProcess(img_msg, info )
     def image2msg(self, image):
-        return self.bridge.cv2_to_imgmsg(image, "bgr8")
+        return self.bridge.cv2_to_imgmsg(image, self.encode)
 
     def publishProcess(self,img_msg,info_msg):
         now = rospy.Time.now()

@@ -37,7 +37,7 @@ class DBox():
 
         elif event == cv2.EVENT_RBUTTONDOWN:
             DBox.onTracking = False
-            if(w>0):
+            if(DBox.w>0):
                 DBox.ix, DBox.iy = x-DBox.w/2, y-DBox.h/2
                 DBox.initTracking = True
     def callback(self):
@@ -67,11 +67,6 @@ class DBox():
             if c==27 or c==ord('q'):
                 exit(0)
                 #break
-        if roi:
-            return roi
-        else:
-            print("not roi")
-            exit(1)
 
 
 class KCF():

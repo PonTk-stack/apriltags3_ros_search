@@ -46,8 +46,9 @@ class ApriltagsDetector():
         if(index >= 0):
             self.updateApriltag(self.tag_list[index],iid,pose,q,pre_pose,pre_q)
         else:
-            #tag = Apriltag()
-            tag = ApriltagsKalman()
+            tag = Apriltag()
+            #tag = ApriltagsKalman()
+            #tag = ApriltagsSpeedKalman()
             tag.set(iid,pose,q,pre_pose,pre_q, size)
             self.tag_list.append(tag)
 

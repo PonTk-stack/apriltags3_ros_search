@@ -1,6 +1,9 @@
+#!/usr/bin/env python
 import pandas as pd
 import time
 import numpy as np
+import time
+import sys
 
 #epis = [x+1 for x in range(len(self.reward_log))]
 #data = pd.DataFrame(columns = ['episode', 'reward'])
@@ -10,13 +13,17 @@ import numpy as np
 
 class Recoder:
     def __init__(self):
-        self.filename = '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/trim_data.csv'
-        self.df = pd.DataFrame(columns = \
-                ['count','detect_count','time','response'\
+        self.filename = '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/powerpo6_data.csv'
+        col = ['count','detect_count','time','response'\
                 ,'tag_velK','anzenK','uv_velK'\
                 ,'pixel','pixel_w','pixel_h'\
                 ,'pure_pixel','pure_pixel_w','pure_pixel_h'\
-                ,'episode','reward'])
+                ,'episode','reward']
+        self.df = pd.DataFrame(columns = col )
+
+        self.__f = open(self.filename,'w')
+        self.__f.write(self.__list2csv_str(col))
+        print("file open :{}".format(self.filename))
 
         self.count = 0
         self.detect_count= 0
@@ -65,6 +72,9 @@ class Recoder:
         self.pure_pixel_h_append  = self.pure_pixel_h_list.append
         self.episode_append     = self.episode_list.append
         self.reward_append      = self.reward_list.append
+    def __del__(self):
+        self.__f.close()
+
     def reset(self):
         self.count = 0.
         self.detect_count= 0.
@@ -131,10 +141,21 @@ class Recoder:
                 self.pure_pixel_w,\
                 self.pure_pixel_h,\
                 self.episode,\
-                self.reward ])
-
+                self.reward\
+                ])
+        #self.__save_csv()
     def to_csv(self):
         self.df.to_csv(self.filename)
+    def __save_csv(self):
+        ss = self.__list2csv_str(self.df.iloc[-1].values)
+        self.__f.write(ss)
+    def __list2csv_str(self,li):
+        ss = ""
+        length = len(li)
+        for i in range(length):
+            ss += str(li[i])
+            ss += ',' if (i < length-1) else '\n'
+        return ss
 
     def recode(self):#,count, detect_count, time, response, tag_velK, anzenK, uv_velK, pixel, pure_pixel, episode, reward):
         self.count_append       ( self.count)
@@ -155,8 +176,8 @@ class Recoder:
 
 if __name__ == '__main__':
     recoder = Recoder()
-    recoder.recode()
     recoder.save()
-    recoder.to_csv()
-
+    """
+    Recoder()
+    """
 

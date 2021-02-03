@@ -27,7 +27,7 @@ def main():
     kf2 = InstantKalmanFilter()
     kf3 = KalmanFilter()
     kf4 = KalmanFilter()
-    df = pd.read_csv('mini20210105.csv')
+    df = pd.read_csv('mini20210112.csv')
     N = len(df['count'])
     t = df['time']
     speed = df['speed_x']
@@ -51,25 +51,26 @@ def main():
     bunsan = 0
     for z,zz,tt,ddt in zip(pos,speed,t,dt):
         if not (zz == 0.0):
-
-            plot_pos.append(z)
-            plot_speed.append(zz)
-            plot_t.append(tt)
-            pp = kf3.test(z)
-            p = z
-
-            i = np.asscalar(pp[0])
-            print(i)
-            estimated_pos.append(i)
-            i = np.asscalar(pp[1])
-            estimated_speed.append(i)
-            """
-            if(pre_pp == 666666):
-                pre_p = p
-                pre_pp = pp
-            """
-        else:
             pass
+
+        plot_pos.append(z)
+        plot_speed.append(zz)
+        plot_t.append(tt)
+        pp = kf3.test(z)
+        p = z
+
+        i = np.asscalar(pp[0])
+        print(i)
+        estimated_pos.append(i)
+        i = np.asscalar(pp[1])
+        estimated_speed.append(i)
+        """
+        if(pre_pp == 666666):
+            pre_p = p
+            pre_pp = pp
+        """
+        #else:
+        #    pass
 
 
 
@@ -90,7 +91,7 @@ def main():
 
     """"""""""""""""""
     plt.subplot(3,2,3)
-    plt.plot(plot_t,plot_speed)
+    plt.plot(t,speed)
     plt.title("speed_x")
     plt.xlabel("time")
     plt.ylabel("m")

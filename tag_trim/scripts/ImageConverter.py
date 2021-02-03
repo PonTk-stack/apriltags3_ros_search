@@ -13,7 +13,12 @@ class ImageConverter():
         img_crop = img[upper:lower,left:right]
         #cv2.imshow("img_crop",img_crop)
         #cv2.waitKey(1)
-        rows,cols,ch = img.shape
-        conved_img = np.zeros(( rows,cols,ch ),np.uint8)
+        if len(img.shape)==2:
+            rows,cols = img.shape
+            conved_img = np.zeros(( rows,cols),np.uint8)
+        elif len(img.shape)==3:
+            rows,cols,ch = img.shape
+            conved_img = np.zeros(( rows,cols,ch ),np.uint8)
+        
         conved_img[upper:lower,left:right] = img_crop
         return conved_img
