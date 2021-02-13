@@ -29,7 +29,7 @@ class Rosbag():
     def __init__(self):
         self.bag = rosbag.Bag(\
         '/home/taisuke/catkin_ws/cam_bag/1m/2020-09-28-13-32-02.bag')
-    def __deli__(self):
+    def __del__(self):
         self.bag.close()
 
 

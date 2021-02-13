@@ -34,8 +34,8 @@ class ImageConverter_ros(ImageConverter):
         Camera.setICP(info)
         try:
             image_ori = self.bridge.imgmsg_to_cv2(img, self.encode)
-        except CvBridgeError, e:
-            print e
+        except CvBridgeError as  e:
+            print (e)
         #detect
         if(Apriltags_ros.detected_flag):
             #frame = [[0,0],[1280,720]]
