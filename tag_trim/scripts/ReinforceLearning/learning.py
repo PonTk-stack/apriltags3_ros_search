@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-import rosbag
+#!/usr/bin/env python3
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
@@ -43,9 +42,6 @@ if __name__ == "__main__":
         pass
 
 
-
-
-
 class ImagePubliser():
     def __init__(self):
         self.image_pub = rospy.Publisher("usb_cam/image", Image, queue_size = 1)
@@ -74,3 +70,4 @@ class ImagePubliser():
                 if(dt == 0): dt=1
                 cv2.waitKey(dt)
             self.t = t
+

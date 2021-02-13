@@ -16,8 +16,6 @@ class Apriltags_ros():
         self.tag_detector = ApriltagsDetector()
 
         self.count = 0
-    def __del__(self):
-        print("owari")
     def tagDetectedCallback(self,msg):
         ids = []
         #Apriltags_ros.frames.clear()
