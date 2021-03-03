@@ -1,4 +1,7 @@
 #!user/bin/env python
+import os
+import sys
+sys.path.append(os.path.dirname(__file__))
 import numpy as np
 
 import sys
@@ -46,9 +49,9 @@ class ApriltagsDetector():
         if(index >= 0):
             self.updateApriltag(self.tag_list[index],iid,pose,q,pre_pose,pre_q)
         else:
-            tag = Apriltag()
+            #tag = Apriltag()
             #tag = ApriltagsKalman()
-            #tag = ApriltagsSpeedKalman()
+            tag = ApriltagsSpeedKalman()
             tag.set(iid,pose,q,pre_pose,pre_q, size)
             self.tag_list.append(tag)
 
@@ -76,8 +79,8 @@ class ApriltagsDetector():
     def getUvApriltag(self,detect):
         iid = detect.id[0]
         index = self.findID(iid)
-        frame = self.uv_tag_obj.tagPose2uv(self.tag_list[index])
-        return frame
+        frame,pureframe = self.uv_tag_obj.tagPose2uv(self.tag_list[index])
+        return frame,pureframe
 
     def updateApriltag(self, tag, iid, pose, q, pre_pos, pre_q):
         tag.update(iid,pose,q,pre_pos,pre_q)

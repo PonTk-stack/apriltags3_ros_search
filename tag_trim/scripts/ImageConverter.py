@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 
 class ImageConverter():
+    def __del__(self):
+        cv2.destroyAllWindows()
     def imageConvert(self, img,frame):
         conved_img = self.image_trim(img,frame)
         return conved_img

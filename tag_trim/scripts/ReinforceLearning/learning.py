@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+import gym
+import torch
+import torch.nn as nn
+env = gym.make('CartPole-v0').unwrapped
+import torchvision.transforms as T
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
+
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
@@ -30,7 +38,7 @@ class Ltag_trim():
         rospy.spin()
 
 if __name__ == "__main__":
-    this_node = Ltag_trim()
+    Ltag_trim()
     try:
         #sim = Learning()
         #sim.load()

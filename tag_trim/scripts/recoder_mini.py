@@ -10,7 +10,8 @@ import numpy as np
 
 class Recoder2:
     def __init__(self):
-        self.filename = '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/powerpo6_mini.csv'
+        #self.filename =   '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/aditional/data_mini11.csv'
+        self.filename =        '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/aditional/dqn_data/data_mini2.csv'
         col =  ['count','detect_count','time','response'\
                 ,'pixel_w','pixel_h'\
                 ,'pure_pixel_w','pure_pixel_h'\

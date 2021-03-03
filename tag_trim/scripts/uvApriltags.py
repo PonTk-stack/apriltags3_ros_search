@@ -6,7 +6,8 @@ class UvApriltag(Camera):
     tag_velK = 1.0
     anzenK = 2.0
     uv_velK = 0.0
-    def __init__(self):
+    def __init__(self, warning_call =False):
+        self.__warning_call = warning_call
         self.ones = np.array([[1.0,1.0,1.0,1.0]])
         self.sizeM = np.array([[0.5,-0.5,-0.5, 0.5],\
                                [0.5, 0.5,-0.5,-0.5],\
@@ -14,6 +15,7 @@ class UvApriltag(Camera):
 
         self.pre_uv = np.zeros((3,1))
 
+        self.pre_uv_vel = np.zeros((3,1))
     def tagPose2pure_uv_size(self, apriltag):
         pose = apriltag.pose
 
@@ -59,15 +61,17 @@ class UvApriltag(Camera):
 
         base_wh = self.cat_base_wh(pure_wh)
 
-        uv_vel = uv - self.pre_uv
+        uv_vel = 0.5*(uv - self.pre_uv) +0.5*self.pre_uv_vel
         vel_wh = self.cat_vel_wh(uv_vel,pure_wh)
 
 
         frame =  self.cat_finallyFrame(uv,uv_vel,base_wh,vel_wh)
 
+        pureframe = self.cat_pureFrame(uv, pure_wh)
         #save pre
         self.pre_uv = uv
-        return frame
+        self.pre_uv_vel = uv_vel
+        return frame , pureframe
     def cat_pure_wh(self,p1,p2,p3,p4):
         #pure_width = max([p1[0,0],p1[0,0],p1[0,0],p1[0,0]])-min([p1[0,0],p1[0,0],p1[0,0],p1[0,0]])
         #pure_height = max([p1[1,0],p1[1,0],p1[1,0],p1[1,0]])-min([p1[1,0],p1[1,0],p1[1,0],p1[1,0]])
@@ -80,8 +84,8 @@ class UvApriltag(Camera):
         #base_window_wh = anzenK*pure_wh
         return UvApriltag.anzenK*pure_wh
     def cat_vel_wh(self,uv_vel,pure_wh):
-        Bwh = np.array([UvApriltag.anzenK + UvApriltag.uv_velK*abs(int(uv_vel[0,0])),\
-                UvApriltag.anzenK + UvApriltag.uv_velK*abs(int(uv_vel[1,0])) ])
+        Bwh = np.array([UvApriltag.anzenK + UvApriltag.uv_velK*abs(uv_vel[0,0]),\
+                UvApriltag.anzenK + UvApriltag.uv_velK*abs(uv_vel[1,0]) ])
         return Bwh*pure_wh
 
     def cat_pureFrame(self,uv,pure_wh):
@@ -95,10 +99,10 @@ class UvApriltag(Camera):
             rightbottom[1]=Camera.image_size[1]
 
             caution = '+' * 30 + '\n'
-            caution += '+{:^28}+\n'.format('Caution')
+            caution += '+{:^28}+\n'.format('Caution : cat_pureFrame')
             caution += '+' * 30 + '\n'
             colored_warning = termcolor.colored(caution, 'yellow')
-            print(colored_warning)#warning
+            if self.__warning_call : print(colored_warning)#warning
         return np.array([lefttop,rightbottom])
 
     def cat_finallyFrame(self,uv,uv_vel,basis_wh,vel_wh):
@@ -129,15 +133,16 @@ class UvApriltag(Camera):
         if(rightbottom[1]>Camera.image_size[1]):
             rightbottom[1]=Camera.image_size[1]
         if(np.any(lefttop > rightbottom)):
+
+
             lefttop[0] = 0
             lefttop[1] = 0
             rightbottom[0]=Camera.image_size[0]
             rightbottom[1]=Camera.image_size[1]
 
             caution = '+' * 30 + '\n'
-            caution += '+{:^28}+\n'.format('Caution')
+            caution += '+{:^28}+\n'.format('Caution:cat_finallyFrame')
             caution += '+' * 30 + '\n'
             colored_warning = termcolor.colored(caution, 'yellow')
-            print(colored_warning)#warning
-
+            if self.__warning_call : print(colored_warning)#warning
         return np.array([lefttop,rightbottom])
