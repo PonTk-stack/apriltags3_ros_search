@@ -37,7 +37,7 @@ class Environment():
                 Action.uv_velK_UP, Action.uv_velK_DOWN]
     def step(self,action):
         #next_state,reward,done = self.transit(self.agent_state,action)
-        next_state,reward,done = self.new_transit(self.agent_state,action)
+        next_state,reward,done = self._new_transit(self.agent_state,action)
 
         #if next_state is not None:
         #    print("next_state is None")
@@ -46,10 +46,10 @@ class Environment():
         #n_state = self.digitize_state(next_state)
         self.agent_state =next_state
         return next_state.s,reward,done,next_state.params
-    def new_transit(self,agent_state, action):
-        next_state = agent_state.clone
-        next_state.action(self.actions[action])
-        reward,done = self.reward_func(next_state)
+    def _new_transit(self,agent_state, action):
+        #next_state = agent_state.clone
+        next_state = self._move(self.actions[action])
+        reward,done = self._reward_func(next_state)
         return next_state,reward,done
 
     def transit(self,agent_state,action):
@@ -84,17 +84,17 @@ class Environment():
         next_state = agent_state
         next_state.action(action)
         return next_state
-    def reward_func(self,agent_state,config=83):
+    def _reward_func(self,agent_params,config=83):
         reward = self.default_reward
         done = False
-        attribute = agent_state.params_for_reward
+        attribute = agent_params
 
         if(attribute[0]==True):
             reward =(attribute[1]/attribute[2])
             self.pre_reward = reward
             done  = False 
             #done  = True
-            if(agent_state.anzenK<1.0 or agent_state.uv_velK <0.0):
+            if(agent_params.anzenK<1.0 or agent_params.uv_velK <0.0):
                 reward -= 100
             return reward,done
         elif(attribute[0]==False):
@@ -102,7 +102,7 @@ class Environment():
             reward = -1
             self.pre_reward = 0
             done  = True
-            if(agent_state.anzenK<1.0 or agent_state.uv_velK <0.0):
+            if(agent_params.anzenK<1.0 or agent_params.uv_velK <0.0):
                 reward -= 100
             return reward,done
         else:
