@@ -8,6 +8,7 @@ import gym
 from env2 import Environment2
 import os
 
+
 # Hyper Parameters
 #env = env.unwrapped
 
@@ -60,6 +61,7 @@ class DQN(object):
         self.target_net = Net(self._N_STATES,self._N_ACTIONS)
 
         self.learn_step_counter = 0                                     # for target updating
+        self.__eval_net_save_iter = 1                                     # for target updating
         self.memory_counter = 0                                         # for storing memory
         self.memory = np.zeros((self._MEMORY_CAPACITY, self._N_STATES * 2 + 2))     # initialize memory
         self.optimizer = torch.optim.Adam(self.eval_net.parameters(), lr=self._LR)
@@ -85,6 +87,7 @@ class DQN(object):
         self.memory_counter += 1
 
     def learn(self,GAMMA=0.9,TARGET_REPLACE_ITER = 100, EVAL_NET_SAVE_ITER = 100 ):
+
         #TARGET_REPLACE_ITER : target update frequency
 
         # target parameter update 
@@ -92,8 +95,14 @@ class DQN(object):
             self.target_net.load_state_dict(self.eval_net.state_dict())
 
             #eval_net save
-            if self.learn_step_counter == EVAL_NET_SAVE_ITER:
-                torch.save(net1,'')
+
+            if self.learn_step_counter == EVAL_NET_SAVE_ITER*self.__eval_net_save_iter:
+                torch.save(self.eval_net.state_dict(),os.environ["HOME"]+"/net")
+
+                if self.__eval_net_save_iter >= 1000:
+                    self.__eval_net_save_iter+=100                                   # for target updating
+                else:
+                    self.__eval_net_save_iter*=10                                    # for target updating
 
 
         self.learn_step_counter += 1
