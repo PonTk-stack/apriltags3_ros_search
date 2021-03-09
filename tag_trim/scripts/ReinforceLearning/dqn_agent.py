@@ -61,7 +61,7 @@ class DQN(object):
         self.target_net = Net(self._N_STATES,self._N_ACTIONS)
 
         self.learn_step_counter = 0                                     # for target updating
-        self.__eval_net_save_iter = 1                                     # for target updating
+        self.__eval_net_save_iter = 0                                     # for target updating
         self.memory_counter = 0                                         # for storing memory
         self.memory = np.zeros((self._MEMORY_CAPACITY, self._N_STATES * 2 + 2))     # initialize memory
         self.optimizer = torch.optim.Adam(self.eval_net.parameters(), lr=self._LR)
@@ -97,12 +97,15 @@ class DQN(object):
             #eval_net save
 
             if self.learn_step_counter == EVAL_NET_SAVE_ITER*self.__eval_net_save_iter:
-                torch.save(self.eval_net.state_dict(),os.environ["HOME"]+"/net")
+                os.makedirs(os.environ["HOME"]+"/dqn_agent_nets", exist_ok=True)
+                torch.save(self.eval_net.state_dict()\
+                        ,os.environ["HOME"]+"/dqn_agent_nets"+"/eval_net"\
+                                + str(self.learn_step_counter)+".pkl" )
 
-                if self.__eval_net_save_iter >= 1000:
-                    self.__eval_net_save_iter+=100                                   # for target updating
+                if self.__eval_net_save_iter >= 100:
+                    self.__eval_net_save_iter+=100                                 # for target updating
                 else:
-                    self.__eval_net_save_iter*=10                                    # for target updating
+                    self.__eval_net_save_iter+=10                                    # for target updating
 
 
         self.learn_step_counter += 1
@@ -137,7 +140,7 @@ print('\nCollecting experience...')
 if __name__ == "__main__":
     env = Environment2()
     dqn = DQN(env.observation_space, env.action_space)
-    for i_episode in range(400):
+    for i_episode in range(10000):
         s = env.reset()
         ep_r = 0
         while True:
