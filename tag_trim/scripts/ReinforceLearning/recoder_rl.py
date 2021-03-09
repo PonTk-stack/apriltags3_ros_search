@@ -4,9 +4,11 @@ import time
 import numpy as np
 import sys
 
+import os
+
 class Recoder_RL:
     def __init__(self):
-        self.filename =        '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/aditional/dqn_data/rldata5.csv'
+        self.filename =   os.environ["HOME"]+"/tag_trim_RL_data/data/aditional/rldata5.csv"
         col = ['count','detect_count'\
                 ,'episode','reward','aveloss','learn_count']
         self.__f = open(self.filename,'w')
