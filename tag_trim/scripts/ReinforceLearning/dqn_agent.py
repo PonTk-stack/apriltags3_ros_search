@@ -6,6 +6,7 @@ import numpy as np
 import gym
 
 from env2 import Environment2
+import os
 
 # Hyper Parameters
 #env = env.unwrapped
@@ -83,13 +84,21 @@ class DQN(object):
         self.memory[index, :] = transition
         self.memory_counter += 1
 
-    def learn(self,GAMMA=0.9,TARGET_REPLACE_ITER = 100):
+    def learn(self,GAMMA=0.9,TARGET_REPLACE_ITER = 100, EVAL_NET_SAVE_ITER = 100 ):
         #TARGET_REPLACE_ITER : target update frequency
 
-        # target parameter update
+        # target parameter update 
         if self.learn_step_counter % TARGET_REPLACE_ITER == 0:
             self.target_net.load_state_dict(self.eval_net.state_dict())
+
+            #eval_net save
+            if self.learn_step_counter == EVAL_NET_SAVE_ITER:
+                torch.save(net1,'')
+
+
         self.learn_step_counter += 1
+
+
 
         # sample batch transitions
         sample_index = np.random.choice(self._MEMORY_CAPACITY, self._BATCH_SIZE)

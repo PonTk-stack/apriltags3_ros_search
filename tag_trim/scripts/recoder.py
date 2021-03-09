@@ -4,6 +4,7 @@ import time
 import numpy as np
 import time
 import sys
+import os
 
 #epis = [x+1 for x in range(len(self.reward_log))]
 #data = pd.DataFrame(columns = ['episode', 'reward'])
@@ -13,8 +14,8 @@ import sys
 
 class Recoder:
     def __init__(self):
-        #self.filename =        '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/aditional/data11.csv'
-        self.filename =        '/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/aditional/dqn_data/data2.csv'
+        #self.filename = os.environ["HOME"]+'/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/aditional/data11.csv'
+        self.filename =  os.environ["HOME"]+'/catkin_ws/src/apriltags3_ros_search/tag_trim/launch/Reinforce-Learning/data/aditional/dqn_data/data2.csv'
         col = ['count','detect_count','time','response'\
                 ,'tag_velK','anzenK','uv_velK'\
                 ,'bbox_lefttop_x','bbox_lefttop_y'\
