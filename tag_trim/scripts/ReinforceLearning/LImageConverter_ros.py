@@ -1,5 +1,6 @@
 import sys
-sys.path.append('/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/scripts/')
+import os
+sys.path.append(os.environ["HOME"]+'/catkin_ws/src/apriltags3_ros_search/tag_trim/scripts/')
 from masking import ImageConverter_ros
 from camera import Camera
 from LApriltags_ros import LApriltags_ros

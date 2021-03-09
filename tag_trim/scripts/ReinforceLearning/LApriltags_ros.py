@@ -14,7 +14,7 @@ import time
 #######################################################
 import os
 import sys
-sys.path.append('/home/taisuke/catkin_ws/src/apriltags3_ros_search/tag_trim/scripts')
+sys.path.append(os.environ["HOME"]+'/catkin_ws/src/apriltags3_ros_search/tag_trim/scripts')
 from ImageConverter import *
 from camera import *
 from ApriltagsDetector import *
@@ -23,7 +23,6 @@ from time_checker import TCR
 
 #######################################################
 import sys
-#sys.path.append('/home/taisuke/catkin_ws/src/roscpp_Manager/rosbag_manager/scripts/')
 #from bag_clock_counter import BagClockCounter
 
 #from env import Environment
