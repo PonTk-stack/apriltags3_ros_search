@@ -6,7 +6,7 @@ import sys
 import os
 class Recoder_RL2:
     def __init__(self):
-        self.filename =  os.environ["HOME"]+"/tag_trim_RL_data/data/aditional/rl2data5.csv'
+        self.filename =  os.environ["HOME"]+"/tag_trim_RL_data/data/aditional/dqn_data/rl2data10.csv"
 
         col = ['count','detect_count','time','response'\
                 ,'tag_velK','anzenK','uv_velK'\

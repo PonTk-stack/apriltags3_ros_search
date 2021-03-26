@@ -30,6 +30,8 @@ import sys
 
 from env2 import Environment2
 from dqn_agent import DQN
+#from env2_z import Environment2_z
+#from dqn_agent_ver2 import DQNv2
 import matplotlib.pyplot as plt
 import matplotlib
 import torch
@@ -143,6 +145,9 @@ class LApriltags_ros(Apriltags_ros,object):
         if(self.bcc.need_switch_fase()):
             recoder_rl.episode = self._episode
             recoder_rl.reward = self._episode_reward
+            if not self._episode_reward_count == 0:
+                recoder_rl.reward_ave = self._episode_reward/self._episode_reward_count
+
             if self._episode_learn_count == 0:
                 recoder_rl.loss = None
             else:
@@ -175,26 +180,32 @@ class LApriltags_ros(Apriltags_ros,object):
         ##########################learning###########################
         if(self.set_learn  and self.__go_learn):
             tag_velK,anzenK,uv_velK=self.tag_detector.getGain()
+            #v1
             k2,k3 = self._GainWithLearning((anzenK,uv_velK),LApriltags_ros.detected_flag,\
                     self.__pure_frame,LApriltags_ros.frame)
+
+            """#v2
+            z = self.tag_detector.getApriltag(0).pose[2][0]
+            k2,k3 = self._GainWithLearning((anzenK,uv_velK,z),LApriltags_ros.detected_flag,\
+                    self.__pure_frame,LApriltags_ros.frame)
+            """
             self.tag_detector.setGain(anzenK=k2,uv_velK=k3 )
-            if not (LApriltags_ros.detected_flag):
-                self.__go_learn = False
         #######################!--learning--#########################
 
         ids = []
         #LApriltags_ros.pure_frame_sizes.clear()
         LApriltags_ros.pure_frame_sizes = []
         if len(msg.detections)>0:
-            self.__continuous_detect_count += 1
-            if(self.__continuous_detect_count >=2 and self.TCR.between() >=1.0):
-                self.__go_learn = True
 
+            self.__continuous_detect_count += 1
             LApriltags_ros.detected_flag = True
 
             for i in range(len(msg.detections)):
                 ids.append(msg.detections[i].id[0])
                 self.tag_detector.setApriltag(msg.detections[i])
+
+                if(self.__continuous_detect_count >=2 and self.TCR.between() >=1.0):
+                    self.__go_learn = True
 
             self.tag_detector.reset_tag_vels(ids)
             for i in range(len(msg.detections)):
@@ -224,6 +235,8 @@ class LApriltags_ros(Apriltags_ros,object):
         self.count += 1
         self.recode_count(LApriltags_ros.detected_flag)
 
+        if not (LApriltags_ros.detected_flag):
+            self.__go_learn = False
     def recode_count(self , detect_flag):
         recoder_rl.count = self.count
         recoder_rl2.count = self.count
@@ -238,8 +251,13 @@ class LApriltags_ros(Apriltags_ros,object):
             self.__nodetected += 1
 
     def _GainWithLearning(self,state,detected_flag,pure_frame,frame):
+            #v1
             k2, k3 = self._Learning(state,detected_flag\
                                 ,pure_frame,frame)
+            """#v2
+            k2, k3,_ = self._Learning(state,detected_flag\
+                                ,pure_frame,frame)
+            """
             return k2, k3
 
     def _Learning_init(self):
@@ -250,11 +268,17 @@ class LApriltags_ros(Apriltags_ros,object):
         env = Environment(anzenK,uv_velK)
         self.QLagent = QLearningAgent(env)
         '''
+        #v1
         self.env = Environment2()
         self.dqn_agent = DQN(self.env.observation_space, self.env.action_space)
+        """#v2
+        self.env = Environment2_z()
+        self.dqn_agent = DQNv2(self.env.observation_space, self.env.action_space)
+        """
 
-        self._episode = -1
+        self._episode = -2
         self._episode_reward = None
+        self._episode_reward_count = 0
         self.__episode_reward_store = []
         #self.__episode_reward_store.append(self._episode_reward)
         self._Learning_reset()
@@ -264,8 +288,13 @@ class LApriltags_ros(Apriltags_ros,object):
         '''
         self._episode += 1
 
-        print(termcolor.colored("Episode: "+str(self._episode)+" , reward: "+str(self._episode_reward),'yellow'))
+        if not self._episode_reward_count == 0:
+            print(termcolor.colored("Episode: "+str(self._episode)\
+                    +", reward_sum: "+str(self._episode_reward)\
+                    +", reward_ave:"+str(self._episode_reward/self._episode_reward_count)\
+                    ,'yellow'))
         self._episode_reward = 0.
+        self._episode_reward_count = 0
         self._episode_learn_count = 0
         self._episode_loss = 0.
         s = self.env.reset()
@@ -289,30 +318,46 @@ class LApriltags_ros(Apriltags_ros,object):
 
         pixel  = (rb[0]-lt[0])*(rb[1]-lt[1])
         pure_pixel= (pure_rb[0]-pure_lt[0])*(pure_rb[1]-pure_lt[1])
+        #v1
+        anzenK,uv_velK = n_s
+        anzenK = anzenK**2
+        """#v2
+        anzenK,uv_velK,_ = n_s
+        """
         if detect_flag:
+            """
             r1 =pure_frame_in_frame*\
-                   100.* (1.-((pixel-pure_pixel)/pixel))
-        else:
-            r1 = -2.
+                   100.* (1.-((pixel-anzenK*pure_pixel)/(pixel)))
+            """
 
-        r =  r1# + (r2 + r3)
+            z = self.tag_detector.getApriltag(0).pose[2][0]
+            if (anzenK*pure_pixel >= pixel):
+                r1 = 1
+            else:
+                r1 = 1*2/(  1 + np.exp(1*(  pixel-anzenK*pure_pixel )/(anzenK*pure_pixel)   )  )
+
+            
+            print(r1)
+        else:
+            r1 = 0.
+
+        r =  r1 # + (r2 + r3)
         if done:
             self.env.reset()
-            r = -0.001
+            r = -10.0
 
             r2 = -2.
             r3 = -2
         else:
-            anzenK,uv_velK = n_s
             minth , maxth = self.env._k1_threshold
             r2 = (maxth-anzenK)/(maxth-minth)
             minth , maxth = self.env._k2_threshold
             r3 = (maxth-uv_velK)/(maxth-minth)
 
         #if not detect_flag : r=-0.1
-        print(r,info)
         self.dqn_agent.store_transition(s, a, r, n_s)
         self._episode_reward += r
+        self._episode_reward_count += 1
 
         if(self.dqn_agent.memory_counter > self.dqn_agent._MEMORY_CAPACITY):
             self._episode_loss += self.dqn_agent.learn()

@@ -8,9 +8,9 @@ import os
 
 class Recoder_RL:
     def __init__(self):
-        self.filename =   os.environ["HOME"]+"/tag_trim_RL_data/data/aditional/rldata5.csv"
+        self.filename =   os.environ["HOME"]+"/tag_trim_RL_data/data/aditional/dqn_data/rldata10.csv"
         col = ['count','detect_count'\
-                ,'episode','reward','aveloss','learn_count']
+                ,'episode','reward','reward_ave','aveloss','learn_count']
         self.__f = open(self.filename,'w')
         self.__f.write(self.__list2csv_str(col))
         print("file open :{}".format(self.filename))
@@ -24,6 +24,7 @@ class Recoder_RL:
         self.detect_count= 0.
         self.episode= 0.
         self.reward= 0.
+        self.reward_ave= 0.
         self.loss= 0.
         self.learn_count = 0.
     def save(self):
@@ -32,6 +33,7 @@ class Recoder_RL:
             self.detect_count,
             self.episode,
             self.reward,
+            self.reward_ave,
             self.loss,
             self.learn_count
         ]
