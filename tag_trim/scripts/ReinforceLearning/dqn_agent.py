@@ -6,6 +6,7 @@ import numpy as np
 import gym
 
 from env2 import Environment2
+
 import os
 
 
@@ -23,24 +24,27 @@ class LSTM_Net(nn.Module):
         self.out = nn.Linear(HIDDEN_DIM, N_ACTIONS)
     def forward(self, x, hidden0 = None):
         x,(hidden, cell) = self.rnn(x, hidden0)
-        print(x)
         actions_value = self.out(x)
         return actions_value
 
 class Net(nn.Module):
     def __init__(self ,N_STATES, N_ACTIONS):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(N_STATES, 400)
+        self.fc1 = nn.Linear(N_STATES, 100)
         self.fc1.weight.data.normal_(0, 0.1)   # initialization
+        """
         self.fc2 = nn.Linear(400, 20, bias=False)
         self.fc2.weight.data.normal_(0, 0.1)   # initialization
-        self.out = nn.Linear(20, N_ACTIONS)
+        """
+        self.out = nn.Linear(100, N_ACTIONS)
         self.out.weight.data.normal_(0, 0.1)   # initialization
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x)
+        """
         x = self.fc2(x)
         x = F.relu(x)
+        """
         actions_value = self.out(x)
         return actions_value
 
@@ -86,7 +90,7 @@ class DQN(object):
         self.memory[index, :] = transition
         self.memory_counter += 1
 
-    def learn(self,GAMMA=0.9,TARGET_REPLACE_ITER = 100, EVAL_NET_SAVE_ITER = 100 ):
+    def learn(self,GAMMA=0.9,TARGET_REPLACE_ITER = 4000, EVAL_NET_SAVE_ITER = 100 ):
 
         #TARGET_REPLACE_ITER : target update frequency
 
@@ -142,6 +146,8 @@ if __name__ == "__main__":
     dqn = DQN(env.observation_space, env.action_space)
     for i_episode in range(10000):
         s = env.reset()
+
+
         ep_r = 0
         while True:
             #env.render()
