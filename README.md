@@ -21,4 +21,4 @@ Also if you use algorism of learing in this, you must install some programs(pyth
    
   Also, version of learing in python  
   
-  `$ roslaunch tag_tirm learning.launch'  
+  `$ roslaunch tag_tirm learning.launch`  
