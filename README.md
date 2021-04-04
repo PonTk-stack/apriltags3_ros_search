@@ -20,5 +20,4 @@ Also if you use algorism of learing in this, you must install some programs(pyth
   `$ roslaunch tag_trim nodelet_cam.launch`  
    
    Also, version of learing in python  
-   
    `$ roslaunch tag_tirm learning.launch'
