@@ -16,7 +16,9 @@ Also if you use algorism of learing in this, you must install some programs(pyth
   
   
 ##Dependent libraries
-　try 
+
+　try
+ 
   `$ cd ~/catkin_ws/src`
   `$ git clone https://github.com/PonTk-stack/File-Manager.git`
   `$ cd ~/catkin_ws`
