@@ -14,7 +14,15 @@ Also if you use algorism of learing in this, you must install some programs(pyth
   * scipy
   * matplotlib
   
-## How to try 
+  
+##Dependent libraries
+　try 
+  `$ cd ~/catkin_ws/src`
+  `$ git clone https://github.com/PonTk-stack/File-Manager.git`
+  `$ cd ~/catkin_ws`
+  `$ catkin_make -j4`
+
+##試してみる方法 
 
   `$ roslaunch tag_trim nodelet_apriltas3.launch`  
   `$ roslaunch tag_trim nodelet_cam.launch`  
@@ -22,3 +30,4 @@ Also if you use algorism of learing in this, you must install some programs(pyth
   Also, version of learing in python  
   
   `$ roslaunch tag_tirm learning.launch`  
+。
