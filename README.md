@@ -15,14 +15,12 @@ Also if you use algorism of learing in this, you must install some programs(pyth
   * matplotlib
   
   
-##Dependent libraries
-
-　try
- 
-  `$ cd ~/catkin_ws/src`
-  `$ git clone https://github.com/PonTk-stack/File-Manager.git`
-  `$ cd ~/catkin_ws`
-  `$ catkin_make -j4`
+##Dependent libraries  
+　try  
+  `$ cd ~/catkin_ws/src`  
+  `$ git clone https://github.com/PonTk-stack/File-Manager.git`  
+  `$ cd ~/catkin_ws`  
+  `$ catkin_make -j4`  
 
 ##試してみる方法 
 
