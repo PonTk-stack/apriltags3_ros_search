@@ -16,8 +16,9 @@ Also if you use algorism of learing in this, you must install some programs(pyth
   
 #install
   try
-  `$ cd ~/catkin_ws/src`
-  `$ git clone https://github.com/PonTk-stack/apriltags3_ros_search.git`
+  `$ cd ~/catkin_ws/src`  
+  `$ git clone https://github.com/PonTk-stack/apriltags3_ros_search.git`  
+  
 ##Dependent libraries  
 　try  
   `$ sudo apt install ros-noetic-usb-cam`
