@@ -14,19 +14,19 @@ Also if you use algorism of learing in this, you must install some programs(pyth
   * scipy
   * matplotlib
   
-#install
-  try
+#install  
+  try  
   `$ cd ~/catkin_ws/src`  
   `$ git clone https://github.com/PonTk-stack/apriltags3_ros_search.git`  
   
 ##Dependent libraries  
 　try  
-  `$ sudo apt install ros-noetic-usb-cam`
-  `$ cd ~/catkin_ws/src`
-  `$ git clone https://github.com/PonTk-stack/File-Manager.git`  
-  `$ cd apriltags3_ros_search/tag_trim/src`
-  `$ rm Real-Time-Video-Stabilization`
-  `$ git clone https://github.com/PonTk-stack/Video-Stabilization.git Real-Time-Video-Stabilization`
+  `$ sudo apt install ros-noetic-usb-cam`  
+  `$ cd ~/catkin_ws/src`  
+  `$ git clone https://github.com/PonTk-stack/File-Manager.git`    
+  `$ cd apriltags3_ros_search/tag_trim/src`  
+  `$ rm Real-Time-Video-Stabilization`  
+  `$ git clone https://github.com/PonTk-stack/Video-Stabilization.git Real-Time-Video-Stabilization`  
   `$ cd ~/catkin_ws`  
   `$ catkin_make -j4`  
 
